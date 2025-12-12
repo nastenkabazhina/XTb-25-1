@@ -42,6 +42,7 @@ class SeparatorView {
       waterLayer: document.getElementById('waterLayer'),
       oilLayer: document.getElementById('oilLayer'),
       gasLayer: document.getElementById('gasLayer'),
+      oilLayerAfterBaffle: document.getElementById('oilLayerAfterBaffle'),
       gasLevelText: document.getElementById('gasLevelText'),
       oilLevelText: document.getElementById('oilLevelText'),
       waterLevelText: document.getElementById('waterLevelText'),
@@ -137,9 +138,40 @@ class SeparatorView {
       gasLevel *= k;
     }
     
+    // Высота перегородки - 50% от высоты сепаратора
+    const baffleHeight = 50;
+    
+    // Расчет суммарного уровня воды и нефти до перегородки
+    const combinedLevel = waterLevel + oilLevel;
+    
+    // Логика перелива нефти через перегородку
+    let oilAfterBaffleLevel = 0;
+    let oilBeforeBaffleLevel = oilLevel;
+    
+    if (combinedLevel > baffleHeight) {
+      // Если суммарный уровень выше перегородки, нефть переливается
+      const overflow = combinedLevel - baffleHeight;
+      
+      if (overflow <= oilLevel) {
+        // Часть нефти переливается за перегородку
+        oilAfterBaffleLevel = overflow;
+        oilBeforeBaffleLevel = oilLevel - overflow;
+      } else {
+        // Вся нефть переливается за перегородку
+        oilAfterBaffleLevel = oilLevel;
+        oilBeforeBaffleLevel = 0;
+      }
+    }
+    
+    // Обновление слоев до перегородки
     this.elements.waterLayer.style.height = waterLevel + "%";
-    this.elements.oilLayer.style.height = oilLevel + "%";
+    this.elements.oilLayer.style.height = oilBeforeBaffleLevel + "%";
     this.elements.oilLayer.style.bottom = waterLevel + "%";
+    
+    // Обновление слоя нефти после перегородки
+    this.elements.oilLayerAfterBaffle.style.height = oilAfterBaffleLevel + "%";
+    
+    // Газовый слой остается без изменений
     this.elements.gasLayer.style.height = gasLevel + "%";
     
     this.elements.waterLevelText.textContent = this.format(waterLevel, 1) + "%";
