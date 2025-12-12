@@ -187,7 +187,16 @@ class SeparatorView {
     this.elements.oilValve.classList.toggle('open', oilOpen);
     this.elements.gasValve.classList.toggle('open', gasOpen);
     
-    // Анимация потока в трубах
+    // Анимация потока в SVG трубах
+    const waterFlows = document.querySelectorAll('.water-flow');
+    const oilFlows = document.querySelectorAll('.oil-flow');
+    const gasFlows = document.querySelectorAll('.gas-flow');
+    
+    waterFlows.forEach(flow => flow.classList.toggle('active', waterOpen));
+    oilFlows.forEach(flow => flow.classList.toggle('active', oilOpen));
+    gasFlows.forEach(flow => flow.classList.toggle('active', gasOpen));
+    
+    // Старая анимация потока в div-трубах (для совместимости)
     [this.elements.waterPipe, this.elements.waterPipe2].forEach(p => 
       p.classList.toggle('active', waterOpen)
     );

@@ -91,42 +91,120 @@
         <!-- Насос -->
         <div class="pump" id="pump">+</div>
 
-        <!-- Трубопроводы -->
-        <!-- Входная труба -->
-        <div class="pipe" id="inletPipe" style="left: 1%; top: 56%; width: 15%; height: 14px;">
+        <!-- Трубопроводы (SVG для цельных линий) -->
+        <svg class="pipes-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+          <defs>
+            <!-- Градиенты для труб -->
+            <linearGradient id="pipeBlueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#1556d6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#0c3faf;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="pipeBlackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="pipeYellowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#d4b000;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#c0a000;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="pipeInletGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#d0d8e2;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#b9c2cf;stop-opacity:1" />
+            </linearGradient>
+            
+            <!-- Анимация потока -->
+            <pattern id="flowBlue" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+              <rect width="15" height="14" fill="rgba(255,255,255,0.1)"/>
+              <rect x="15" width="15" height="14" fill="transparent"/>
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+            </pattern>
+            <pattern id="flowBlack" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+              <rect width="15" height="14" fill="rgba(255,255,255,0.18)"/>
+              <rect x="15" width="15" height="14" fill="transparent"/>
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+            </pattern>
+            <pattern id="flowYellow" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+              <rect width="15" height="14" fill="rgba(255,255,255,0.2)"/>
+              <rect x="15" width="15" height="14" fill="transparent"/>
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+            </pattern>
+          </defs>
+          
+          <!-- Входная труба -->
+          <g id="inletPipeSvg">
+            <path d="M 10 336 L 160 336" stroke="url(#pipeInletGrad)" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <path class="flow-line" d="M 10 336 L 160 336" stroke="url(#flowBlue)" stroke-width="14" fill="none" stroke-linecap="round" opacity="0"/>
+          </g>
+          
+          <!-- Водяная линия (цельная L-образная труба) -->
+          <g id="waterPipeSvg">
+            <path d="M 200 516 L 460 516 L 460 456 L 620 456" 
+                  stroke="url(#pipeBlueGrad)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="flow-line water-flow" 
+                  d="M 200 516 L 460 516 L 460 456 L 620 456" 
+                  stroke="url(#flowBlue)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+          </g>
+          
+          <!-- Нефтяная линия (цельная L-образная труба) -->
+          <g id="oilPipeSvg">
+            <path d="M 780 504 L 700 504 L 700 456 L 540 456" 
+                  stroke="url(#pipeBlackGrad)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="flow-line oil-flow" 
+                  d="M 780 504 L 700 504 L 700 456 L 540 456" 
+                  stroke="url(#flowBlack)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+          </g>
+          
+          <!-- Газовая линия (цельная L-образная труба) -->
+          <g id="gasPipeSvg">
+            <path d="M 820 132 L 700 132 L 700 168 L 540 168" 
+                  stroke="url(#pipeYellowGrad)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="flow-line gas-flow" 
+                  d="M 820 132 L 700 132 L 700 168 L 540 168" 
+                  stroke="url(#flowYellow)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+          </g>
+        </svg>
+        
+        <!-- Входная труба (для совместимости с существующим кодом) -->
+        <div class="pipe" id="inletPipe" style="left: 1%; top: 56%; width: 15%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
         
-        <!-- Водяная линия -->
-        <div class="pipe pipe-blue" id="waterPipe" style="left: 20%; bottom: 14%; width: 26%; height: 14px;">
+        <!-- Водяная линия (скрытые div'ы для совместимости) -->
+        <div class="pipe pipe-blue" id="waterPipe" style="left: 20%; bottom: 14%; width: 26%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe vertical pipe-blue" style="left: 46%; bottom: 14%; height: 90px;">
+        <div class="pipe vertical pipe-blue" style="left: 46%; bottom: 14%; height: 90px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe pipe-blue" id="waterPipe2" style="left: 46%; bottom: 24%; width: 16%; height: 14px;">
-          <div class="flow"></div>
-        </div>
-        
-        <!-- Нефтяная линия -->
-        <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 16%; width: 22%; height: 14px;">
-          <div class="flow"></div>
-        </div>
-        <div class="pipe vertical pipe-black" style="right: 30%; bottom: 16%; height: 90px;">
-          <div class="flow"></div>
-        </div>
-        <div class="pipe pipe-black" id="oilPipe2" style="right: 30%; bottom: 24%; width: 16%; height: 14px;">
+        <div class="pipe pipe-blue" id="waterPipe2" style="left: 46%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
         
-        <!-- Газовая линия -->
-        <div class="pipe pipe-yellow" id="gasPipe" style="right: 12%; top: 22%; width: 18%; height: 14px;">
+        <!-- Нефтяная линия (скрытые div'ы для совместимости) -->
+        <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 16%; width: 22%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe vertical pipe-yellow" style="right: 30%; top: 22%; height: 50px;">
+        <div class="pipe vertical pipe-black" style="right: 30%; bottom: 16%; height: 90px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe pipe-yellow" id="gasPipe2" style="right: 30%; top: 28%; width: 16%; height: 14px;">
+        <div class="pipe pipe-black" id="oilPipe2" style="right: 30%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        
+        <!-- Газовая линия (скрытые div'ы для совместимости) -->
+        <div class="pipe pipe-yellow" id="gasPipe" style="right: 12%; top: 22%; width: 18%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-yellow" style="right: 30%; top: 22%; height: 50px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-yellow" id="gasPipe2" style="right: 30%; top: 28%; width: 16%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
 
