@@ -38,7 +38,6 @@ class SeparatorView {
       oilQ: document.getElementById('oilQ'),
       
       // Визуализация
-      gaugePressure: document.getElementById('gaugePressure'),
       waterLayer: document.getElementById('waterLayer'),
       oilLayer: document.getElementById('oilLayer'),
       gasLayer: document.getElementById('gasLayer'),
@@ -98,7 +97,6 @@ class SeparatorView {
   updatePressure(pressure) {
     const formatted = this.format(pressure, 0);
     this.elements.pressureOut.textContent = formatted + " кПа";
-    this.elements.gaugePressure.textContent = formatted;
   }
   
   /**
