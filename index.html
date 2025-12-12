@@ -4,319 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Цифровой двойник трёхфазного сепаратора</title>
-  <style>
-    :root {
-      --bg: #111820;
-      --panel: #1b2634;
-      --panel-2: #0f1823;
-      --accent: #4fa3ff;
-      --oil: #111;
-      --water: #1f6bff;
-      --gas: #d6d6d6;
-      --danger: #ff4d4f;
-      --ok: #4caf50;
-      --pipe-blue: #0540c8;
-      --pipe-black: #111;
-      --pipe-yellow: #d6b600;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: var(--bg);
-      color: #e9eef5;
-      overflow-x: hidden;
-    }
-    h1, h2, h3 { margin: 0; }
-    .page {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      min-height: 100vh;
-    }
-    .sidebar {
-      background: var(--panel);
-      padding: 18px;
-      border-right: 1px solid #243244;
-    }
-    .sidebar h2 {
-      font-size: 18px;
-      margin-bottom: 12px;
-      letter-spacing: 0.3px;
-    }
-    .tabs {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .tab-btn {
-      border: 1px solid #2f4054;
-      background: #152033;
-      color: #dce5f1;
-      border-radius: 10px;
-      padding: 12px 14px;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .tab-btn.active {
-      background: #235dac;
-      border-color: #3f7bd8;
-      box-shadow: 0 0 12px rgba(79, 163, 255, 0.35);
-    }
-    .tab-content {
-      margin-top: 14px;
-      padding: 14px;
-      background: var(--panel-2);
-      border: 1px solid #1f2c3c;
-      border-radius: 12px;
-      display: none;
-      gap: 12px;
-    }
-    .tab-content.active { display: grid; }
-    .control {
-      display: grid;
-      gap: 6px;
-    }
-    .control label {
-      font-size: 13px;
-      color: #cdd7e6;
-    }
-    .control input[type="range"] {
-      width: 100%;
-    }
-    .value-box {
-      background: #0c131d;
-      border: 1px solid #1d2b3a;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 13px;
-      display: inline-flex;
-      gap: 6px;
-      align-items: center;
-    }
-    .value-box .label {
-      color: #8fa5c2;
-    }
-    .main {
-      position: relative;
-      padding: 16px 18px 30px 18px;
-      overflow: hidden;
-    }
-    .title {
-      text-align: center;
-      margin-bottom: 12px;
-      font-size: 22px;
-      letter-spacing: 0.4px;
-    }
-    .sim-area {
-      position: relative;
-      background: radial-gradient(circle at 20% 20%, #1a2736, #0c1119 55%);
-      border: 1px solid #1f2c3c;
-      border-radius: 12px;
-      min-height: 540px;
-      overflow: hidden;
-    }
-    .separator {
-      position: absolute;
-      left: 50%;
-      top: 52%;
-      transform: translate(-50%, -50%);
-      width: 72%;
-      height: 260px;
-      background: linear-gradient(180deg, #7f858e 0%, #6c737c 100%);
-      border-radius: 30px;
-      border: 3px solid #50545d;
-      box-shadow: inset 0 0 0 10px #888e98, 0 25px 35px rgba(0,0,0,0.35);
-      overflow: hidden;
-    }
-    .separator::after {
-      content: "";
-      position: absolute;
-      inset: 18px;
-      border: 2px dashed rgba(255,255,255,0.18);
-      border-radius: 22px;
-      pointer-events: none;
-    }
-    .phase-layer {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      transition: height 0.6s ease;
-      border-radius: 16px 16px 6px 6px;
-      overflow: hidden;
-    }
-    .water {
-      bottom: 10px;
-      background: linear-gradient(180deg, #2f8cff 0%, #0d57c7 100%);
-      box-shadow: inset 0 0 18px rgba(0,0,0,0.35);
-    }
-    .oil {
-      bottom: 10px;
-      background: linear-gradient(180deg, #141414 0%, #050505 70%);
-      box-shadow: inset 0 0 22px rgba(255,255,255,0.08);
-    }
-    .gas {
-      top: 10px;
-      background: repeating-radial-gradient(circle at 15% 25%, rgba(255,255,255,0.25) 0 4px, rgba(0,0,0,0) 4px 16px),
-                  repeating-radial-gradient(circle at 75% 35%, rgba(255,255,255,0.2) 0 3px, rgba(0,0,0,0) 4px 18px),
-                  linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(210,210,210,0.5) 100%);
-      animation: bubbles 6s infinite linear;
-      opacity: 0.92;
-    }
-    @keyframes bubbles {
-      0% { background-position: 0 0, 0 0, 0 0; }
-      100% { background-position: 0 -120px, 0 -100px, 0 0; }
-    }
-    .pipe {
-      position: absolute;
-      height: 14px;
-      background: #b9c2cf;
-      border-radius: 6px;
-      box-shadow: inset 0 0 6px rgba(0,0,0,0.35);
-      overflow: hidden;
-    }
-    .pipe.vertical {
-      width: 14px;
-    }
-    .pipe .flow {
-      position: absolute;
-      inset: 0;
-      background-size: 30px 14px;
-      background-repeat: repeat-x;
-      animation: flow 1s linear infinite;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .pipe.active .flow { opacity: 1; }
-    @keyframes flow {
-      from { background-position-x: 0; }
-      to { background-position-x: 30px; }
-    }
-    .pipe-blue { background: #0c3faf; }
-    .pipe-blue .flow { background-image: linear-gradient(90deg, rgba(255,255,255,0.1) 0 50%, transparent 50% 100%); }
-    .pipe-black { background: #0a0a0a; }
-    .pipe-black .flow { background-image: linear-gradient(90deg, rgba(255,255,255,0.18) 0 50%, transparent 50% 100%); }
-    .pipe-yellow { background: #c0a000; }
-    .pipe-yellow .flow { background-image: linear-gradient(90deg, rgba(255,255,255,0.2) 0 50%, transparent 50% 100%); }
-    .valve {
-      position: absolute;
-      width: 34px;
-      height: 34px;
-      background: #dfe6ee;
-      border-radius: 10px;
-      border: 3px solid #8c9bb0;
-      box-shadow: inset 0 0 8px rgba(0,0,0,0.35);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      color: #0d1522;
-      user-select: none;
-    }
-    .valve.open { background: #9ee1a1; border-color: #5abf60; }
-    .valve-label {
-      position: absolute;
-      top: 36px;
-      font-size: 12px;
-      color: #cdd7e6;
-      width: 120px;
-      text-align: center;
-    }
-    .pump {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #7aa3ff, #1f3f8c 70%);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.35);
-      left: 6%;
-      top: 58%;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      color: #fff;
-      font-weight: 600;
-      border: 3px solid #9fb9ff;
-    }
-    .pump::after {
-      content: "Насос";
-      position: absolute;
-      bottom: -22px;
-      font-size: 12px;
-      color: #cdd7e6;
-    }
-    .gauge {
-      position: absolute;
-      top: 32%;
-      left: 44%;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      border: 5px solid #b0c4de;
-      background: #0f1823;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      color: #dbe5f5;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
-    }
-    .readouts {
-      position: absolute;
-      right: 14px;
-      top: 14px;
-      display: grid;
-      gap: 8px;
-      min-width: 180px;
-    }
-    .pill {
-      background: #122030;
-      border: 1px solid #203143;
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .pill span:last-child { color: #9fd1ff; }
-    .alert {
-      position: absolute;
-      bottom: 16px;
-      right: 16px;
-      min-width: 260px;
-      padding: 12px 14px;
-      background: rgba(255, 77, 79, 0.9);
-      border: 2px solid #ffb3b4;
-      border-radius: 12px;
-      color: #fff;
-      font-weight: 700;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-      display: none;
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      50% { opacity: 0.2; }
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      background: #132236;
-      border: 1px solid #203143;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 8px;
-      align-items: center;
-    }
-  </style>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <div class="page">
+    <!-- Левая панель: Управление клапанами -->
     <aside class="sidebar">
       <h2>Управление клапанами</h2>
       <div class="tabs">
@@ -324,6 +16,8 @@
         <button class="tab-btn" data-tab="water">Клапан регулятора уровня воды в основной камере</button>
         <button class="tab-btn" data-tab="oil">Клапан регулятора уровня нефти в основной камере</button>
       </div>
+      
+      <!-- Вкладка: Регулятор давления -->
       <div id="pressure" class="tab-content active">
         <div class="control">
           <label>Шкала открытия клапана (Kvs): <span id="kvsVal">0.5</span></label>
@@ -331,20 +25,22 @@
         </div>
         <div class="control">
           <label>Шкала расхода жидкости Q (м³/сут): <span id="flowVal">100</span></label>
-          <input type="range" id="flow" min="100" max="1000" step="10" value="100">
+          <input type="range" id="flow" min="100" max="8000" step="10" value="100">
         </div>
         <div class="value-box">
           <span class="label">Давление:</span>
           <span id="pressureOut">0</span>
         </div>
       </div>
+      
+      <!-- Вкладка: Регулятор воды -->
       <div id="water" class="tab-content">
         <div class="control">
-          <label>Коэффициент пропускной способности клапана (Cv), м³/ч: <span id="waterCvVal">20</span></label>
+          <label>Коэффициент пропускной способности (Cv), м³/ч: <span id="waterCvVal">20</span></label>
           <input type="range" id="waterCv" min="0" max="56" step="1" value="20">
         </div>
         <div class="control">
-          <label>Перепад давления на клапане (ΔP), бар: <span id="waterDpVal">4</span></label>
+          <label>Перепад давления (ΔP), бар: <span id="waterDpVal">4</span></label>
           <input type="range" id="waterDp" min="0" max="8.5" step="0.1" value="4">
         </div>
         <div class="control">
@@ -356,13 +52,15 @@
           <span id="waterQ">0</span>
         </div>
       </div>
+      
+      <!-- Вкладка: Регулятор нефти -->
       <div id="oil" class="tab-content">
         <div class="control">
-          <label>Коэффициент пропускной способности клапана (Cv), м³/ч: <span id="oilCvVal">20</span></label>
+          <label>Коэффициент пропускной способности (Cv), м³/ч: <span id="oilCvVal">20</span></label>
           <input type="range" id="oilCv" min="0" max="56" step="1" value="20">
         </div>
         <div class="control">
-          <label>Перепад давления на клапане (ΔP), бар: <span id="oilDpVal">4</span></label>
+          <label>Перепад давления (ΔP), бар: <span id="oilDpVal">4</span></label>
           <input type="range" id="oilDp" min="0" max="8.5" step="0.1" value="4">
         </div>
         <div class="control">
@@ -376,23 +74,30 @@
       </div>
     </aside>
 
+    <!-- Центральная панель: Цифровой двойник -->
     <main class="main">
       <div class="title">Цифровой двойник</div>
       <div class="sim-area">
+        <!-- Сепаратор -->
         <div class="separator" id="separator">
           <div class="phase-layer water" id="waterLayer" style="height:30%;"></div>
           <div class="phase-layer oil" id="oilLayer" style="height:30%;"></div>
           <div class="phase-layer gas" id="gasLayer" style="height:40%;"></div>
         </div>
 
+        <!-- Насос -->
         <div class="pump" id="pump">+</div>
 
+        <!-- Трубопроводы -->
+        <!-- Входная труба -->
         <div class="pipe" id="inletPipe" style="left: 3%; top: 56%; width: 32%; height: 14px;">
           <div class="flow"></div>
         </div>
         <div class="pipe vertical" style="left: 35%; top: 43%; height: 60px;">
           <div class="flow"></div>
         </div>
+        
+        <!-- Водяная линия -->
         <div class="pipe pipe-blue" id="waterPipe" style="left: 20%; bottom: 14%; width: 26%; height: 14px;">
           <div class="flow"></div>
         </div>
@@ -402,6 +107,8 @@
         <div class="pipe pipe-blue" id="waterPipe2" style="left: 46%; bottom: 24%; width: 16%; height: 14px;">
           <div class="flow"></div>
         </div>
+        
+        <!-- Нефтяная линия -->
         <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 16%; width: 22%; height: 14px;">
           <div class="flow"></div>
         </div>
@@ -411,6 +118,8 @@
         <div class="pipe pipe-black" id="oilPipe2" style="right: 30%; bottom: 24%; width: 16%; height: 14px;">
           <div class="flow"></div>
         </div>
+        
+        <!-- Газовая линия -->
         <div class="pipe pipe-yellow" id="gasPipe" style="right: 12%; top: 22%; width: 18%; height: 14px;">
           <div class="flow"></div>
         </div>
@@ -421,6 +130,7 @@
           <div class="flow"></div>
         </div>
 
+        <!-- Клапаны -->
         <div class="valve open" id="waterValve" style="left: 40%; bottom: 14%;">H2O</div>
         <div class="valve-label" style="left: 30%; bottom: -2%;">Клапан воды</div>
 
@@ -430,12 +140,14 @@
         <div class="valve open" id="gasValve" style="right: 22%; top: 16%;">Gas</div>
         <div class="valve-label" style="right: 6%; top: 2%;">Клапан газа</div>
 
+        <!-- Манометр -->
         <div class="gauge">
           <div style="text-align:center">
             Давление<br><span id="gaugePressure">0</span>
           </div>
         </div>
 
+        <!-- Показатели -->
         <div class="readouts">
           <div class="pill">Газ: <span id="gasLevelText">40%</span></div>
           <div class="pill">Нефть: <span id="oilLevelText">30%</span></div>
@@ -443,260 +155,33 @@
           <div class="pill">Расход на входе: <span id="inletFlowText">200 м³/сут</span></div>
         </div>
 
+        <!-- Алерт -->
         <div class="alert" id="alertBox">Авария</div>
       </div>
     </main>
+
+    <!-- Правая панель: Рекомендации -->
+    <aside class="recommendations">
+      <h2>Рекомендации</h2>
+      <div id="recommendationContent" class="recommendation-content">
+        <div class="status-badge normal">ЗАГРУЗКА</div>
+        <h3>Инициализация системы...</h3>
+        <p>Пожалуйста, подождите.</p>
+      </div>
+    </aside>
   </div>
 
+  <!-- Подключение модулей -->
+  <script src="js/model.js"></script>
+  <script src="js/view.js"></script>
+  <script src="js/controller.js"></script>
+  
+  <!-- Инициализация приложения -->
   <script>
-    const tabs = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    tabs.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabs.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tab).classList.add('active');
-      });
-    });
-
-    const state = {
-      kvs: 0.5,
-      flow: 100,
-      inletFlow: 200,
-      waterCv: 20,
-      waterDp: 4,
-      waterU: 0.5,
-      oilCv: 20,
-      oilDp: 4,
-      oilU: 0.5,
-      waterValve: true,
-      oilValve: true,
-      gasValve: true,
-      waterLevel: 30,
-      oilLevel: 30,
-      gasLevel: 40
-    };
-
-    const el = {
-      kvs: document.getElementById('kvs'),
-      flow: document.getElementById('flow'),
-      kvsVal: document.getElementById('kvsVal'),
-      flowVal: document.getElementById('flowVal'),
-      pressureOut: document.getElementById('pressureOut'),
-      waterCv: document.getElementById('waterCv'),
-      waterDp: document.getElementById('waterDp'),
-      waterU: document.getElementById('waterU'),
-      waterCvVal: document.getElementById('waterCvVal'),
-      waterDpVal: document.getElementById('waterDpVal'),
-      waterUVal: document.getElementById('waterUVal'),
-      waterQ: document.getElementById('waterQ'),
-      oilCv: document.getElementById('oilCv'),
-      oilDp: document.getElementById('oilDp'),
-      oilU: document.getElementById('oilU'),
-      oilCvVal: document.getElementById('oilCvVal'),
-      oilDpVal: document.getElementById('oilDpVal'),
-      oilUVal: document.getElementById('oilUVal'),
-      oilQ: document.getElementById('oilQ'),
-      gaugePressure: document.getElementById('gaugePressure'),
-      waterLayer: document.getElementById('waterLayer'),
-      oilLayer: document.getElementById('oilLayer'),
-      gasLayer: document.getElementById('gasLayer'),
-      gasLevelText: document.getElementById('gasLevelText'),
-      oilLevelText: document.getElementById('oilLevelText'),
-      waterLevelText: document.getElementById('waterLevelText'),
-      inletFlowText: document.getElementById('inletFlowText'),
-      alert: document.getElementById('alertBox'),
-      waterValve: document.getElementById('waterValve'),
-      oilValve: document.getElementById('oilValve'),
-      gasValve: document.getElementById('gasValve'),
-      pump: document.getElementById('pump'),
-      inletPipe: document.getElementById('inletPipe'),
-      waterPipe: document.getElementById('waterPipe'),
-      waterPipe2: document.getElementById('waterPipe2'),
-      oilPipe: document.getElementById('oilPipe'),
-      oilPipe2: document.getElementById('oilPipe2'),
-      gasPipe: document.getElementById('gasPipe'),
-      gasPipe2: document.getElementById('gasPipe2')
-    };
-
-    const format = (v, digits = 1) => Number(v).toFixed(digits);
-
-    function updatePressure() {
-      const p = state.kvs * Math.pow(state.flow, 2);
-      el.pressureOut.textContent = format(p, 0) + " усл.ед.";
-      el.gaugePressure.textContent = format(p, 0);
-    }
-
-    function calcWaterQ() {
-      const q = state.waterCv * state.waterU * Math.sqrt(state.waterDp || 0);
-      el.waterQ.textContent = format(q, 1) + " %";
-      if (q > 70) showAlert("Авария: обводнённость > 70%. Откройте клапан и сбросьте воду.");
-      else if (q < 30) showAlert("Авария: обводнённость < 30%. Прикройте клапан.");
-      return q;
-    }
-
-    function calcOilQ() {
-      const q = state.oilCv * state.oilU * Math.sqrt(state.oilDp || 0);
-      el.oilQ.textContent = format(q, 2) + " %";
-      if (q > 15) showAlert("Авария: уровень нефти > 15%. Откройте клапан нефти.");
-      else if (q < 0.5) showAlert("Авария: уровень нефти < 0.5%. Закройте клапан нефти.");
-      return q;
-    }
-
-    let alertTimer;
-    function showAlert(msg) {
-      el.alert.textContent = msg;
-      el.alert.style.display = "block";
-      clearTimeout(alertTimer);
-      alertTimer = setTimeout(() => { el.alert.style.display = "none"; }, 4000);
-    }
-
-    function updateLevels() {
-      const total = state.waterLevel + state.oilLevel + state.gasLevel;
-      if (total > 100) {
-        const k = 100 / total;
-        state.waterLevel *= k;
-        state.oilLevel *= k;
-        state.gasLevel *= k;
-      }
-      el.waterLayer.style.height = state.waterLevel + "%";
-      el.oilLayer.style.height = state.oilLevel + "%";
-      el.oilLayer.style.bottom = state.waterLevel + "%";
-      el.gasLayer.style.height = state.gasLevel + "%";
-      el.gasLayer.style.top = "10px";
-
-      el.waterLevelText.textContent = format(state.waterLevel, 1) + "%";
-      el.oilLevelText.textContent = format(state.oilLevel, 1) + "%";
-      el.gasLevelText.textContent = format(state.gasLevel, 1) + "%";
-    }
-
-    function tick() {
-      // Inflow emulsion splits into phases
-      const inflow = state.inletFlow / 1000;
-      state.waterLevel += inflow * 0.35;
-      state.oilLevel += inflow * 0.4;
-      state.gasLevel += inflow * 0.25;
-
-      // Drains if valves are open
-      if (state.waterValve) state.waterLevel -= 0.35;
-      else state.waterLevel += 0.4;
-
-      if (state.oilValve) state.oilLevel -= 0.3;
-      else state.oilLevel += 0.35;
-
-      if (state.gasValve) state.gasLevel -= 0.25;
-      else state.gasLevel += 0.3;
-
-      // Clamp to safe ranges
-      state.waterLevel = Math.max(5, Math.min(80, state.waterLevel));
-      state.oilLevel = Math.max(5, Math.min(80, state.oilLevel));
-      state.gasLevel = Math.max(5, Math.min(80, state.gasLevel));
-
-      // Alert logic by levels
-      if (!state.waterValve && state.waterLevel > 65) {
-        showAlert("Авария: уровень воды растёт, откройте водяной клапан!");
-      }
-      if (!state.oilValve && state.oilLevel > 55) {
-        showAlert("Авария: уровень нефти растёт, откройте нефтяной клапан!");
-      }
-      if (!state.gasValve && state.gasLevel > 60) {
-        showAlert("Авария: уровень газа растёт, откройте газовый клапан!");
-      }
-
-      updateLevels();
-    }
-
-    function updateValveUI() {
-      const toggleClass = (node, open) => {
-        node.classList.toggle('open', open);
-        node.querySelectorAll('.flow')?.forEach(f => f.parentElement.classList.toggle('active', open));
-      };
-      el.waterValve.classList.toggle('open', state.waterValve);
-      el.oilValve.classList.toggle('open', state.oilValve);
-      el.gasValve.classList.toggle('open', state.gasValve);
-
-      [el.waterPipe, el.waterPipe2].forEach(p => p.classList.toggle('active', state.waterValve));
-      [el.oilPipe, el.oilPipe2].forEach(p => p.classList.toggle('active', state.oilValve));
-      [el.gasPipe, el.gasPipe2].forEach(p => p.classList.toggle('active', state.gasValve));
-    }
-
-    // Inputs wiring
-    el.kvs.addEventListener('input', e => {
-      state.kvs = Number(e.target.value);
-      el.kvsVal.textContent = e.target.value;
-      updatePressure();
-    });
-    el.flow.addEventListener('input', e => {
-      state.flow = Number(e.target.value);
-      el.flowVal.textContent = e.target.value;
-      updatePressure();
-    });
-
-    el.waterCv.addEventListener('input', e => {
-      state.waterCv = Number(e.target.value);
-      el.waterCvVal.textContent = e.target.value;
-      calcWaterQ();
-    });
-    el.waterDp.addEventListener('input', e => {
-      state.waterDp = Number(e.target.value);
-      el.waterDpVal.textContent = e.target.value;
-      calcWaterQ();
-    });
-    el.waterU.addEventListener('input', e => {
-      state.waterU = Number(e.target.value);
-      el.waterUVal.textContent = e.target.value;
-      calcWaterQ();
-    });
-
-    el.oilCv.addEventListener('input', e => {
-      state.oilCv = Number(e.target.value);
-      el.oilCvVal.textContent = e.target.value;
-      calcOilQ();
-    });
-    el.oilDp.addEventListener('input', e => {
-      state.oilDp = Number(e.target.value);
-      el.oilDpVal.textContent = e.target.value;
-      calcOilQ();
-    });
-    el.oilU.addEventListener('input', e => {
-      state.oilU = Number(e.target.value);
-      el.oilUVal.textContent = e.target.value;
-      calcOilQ();
-    });
-
-    el.waterValve.addEventListener('click', () => {
-      state.waterValve = !state.waterValve;
-      updateValveUI();
-    });
-    el.oilValve.addEventListener('click', () => {
-      state.oilValve = !state.oilValve;
-      updateValveUI();
-    });
-    el.gasValve.addEventListener('click', () => {
-      state.gasValve = !state.gasValve;
-      updateValveUI();
-    });
-
-    el.pump.addEventListener('click', () => {
-      state.inletFlow = Math.min(1000, state.inletFlow + 50);
-      el.inletFlowText.textContent = state.inletFlow + " м³/сут";
-      el.inletPipe.classList.add('active');
-      showAlert("Насос увеличил подачу: " + state.inletFlow + " м³/сут");
-      setTimeout(() => el.inletPipe.classList.remove('active'), 1500);
-    });
-
-    function init() {
-      updatePressure();
-      calcWaterQ();
-      calcOilQ();
-      updateLevels();
-      updateValveUI();
-      el.inletFlowText.textContent = state.inletFlow + " м³/сут";
-      setInterval(tick, 900);
-    }
-    init();
+    // Создание экземпляров компонентов
+    const model = new SeparatorModel();
+    const view = new SeparatorView();
+    const controller = new SeparatorController(model, view);
   </script>
 </body>
 </html>
-
