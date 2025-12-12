@@ -1,934 +1,702 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Цифровой двойник - Подготовка нефти, газа и воды</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
-            color: #fff;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo i {
-            font-size: 2.5rem;
-            color: #4a69bd;
-        }
-
-        .logo h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        .logo span {
-            color: #4a69bd;
-        }
-
-        .time-display {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel {
-            background: rgba(25, 42, 86, 0.7);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .panel-title i {
-            color: #4a69bd;
-            font-size: 1.5rem;
-        }
-
-        .panel-title h2 {
-            font-size: 1.4rem;
-            font-weight: 500;
-        }
-
-        /* Сепаратор */
-        .separator-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            justify-content: center;
-        }
-
-        .separator {
-            width: 180px;
-            height: 400px;
-            background: linear-gradient(to right, #2c3e50, #34495e);
-            border-radius: 20px;
-            position: relative;
-            border: 3px solid #4a69bd;
-            overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .separator::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 33%;
-            background: linear-gradient(to bottom, rgba(52, 152, 219, 0.7), rgba(41, 128, 185, 0.9));
-            border-radius: 17px 17px 0 0;
-            transition: all 1s ease;
-        }
-
-        .separator::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 33%;
-            background: linear-gradient(to top, rgba(46, 204, 113, 0.7), rgba(39, 174, 96, 0.9));
-            border-radius: 0 0 17px 17px;
-            transition: all 1s ease;
-        }
-
-        .separator-levels {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 10px 0;
-        }
-
-        .separator-level {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
-            font-size: 1.1rem;
-        }
-
-        .separator-level span {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 2px 10px;
-            border-radius: 10px;
-        }
-
-        .separator-connectors {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-        }
-
-        .connector {
-            position: absolute;
-            width: 30px;
-            height: 15px;
-            background: #4a69bd;
-        }
-
-        .connector-in {
-            top: 50%;
-            left: -30px;
-            transform: translateY(-50%);
-        }
-
-        .connector-gas {
-            top: 17%;
-            right: -30px;
-            background: #3498db;
-        }
-
-        .connector-oil {
-            top: 50%;
-            right: -30px;
-            background: #2c3e50;
-        }
-
-        .connector-water {
-            bottom: 17%;
-            right: -30px;
-            background: #27ae60;
-        }
-
-        .connector-label {
-            position: absolute;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.8);
-            white-space: nowrap;
-        }
-
-        .in-label {
-            top: 50%;
-            left: -100px;
-            transform: translateY(-50%);
-        }
-
-        .gas-label {
-            top: 17%;
-            right: -100px;
-            color: #3498db;
-        }
-
-        .oil-label {
-            top: 50%;
-            right: -100px;
-            transform: translateY(-50%);
-            color: #f1c40f;
-        }
-
-        .water-label {
-            bottom: 17%;
-            right: -100px;
-            color: #27ae60;
-        }
-
-        /* Показатели */
-        .indicators {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .indicator {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .indicator-header {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .indicator-name {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .indicator-name i {
-            color: #4a69bd;
-        }
-
-        .indicator-value {
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-
-        .indicator-bar {
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .indicator-fill {
-            height: 100%;
-            border-radius: 6px;
-            transition: width 1s ease;
-        }
-
-        .gas-fill {
-            background: linear-gradient(to right, #2980b9, #3498db);
-        }
-
-        .oil-fill {
-            background: linear-gradient(to right, #f39c12, #f1c40f);
-        }
-
-        .water-fill {
-            background: linear-gradient(to right, #27ae60, #2ecc71);
-        }
-
-        /* Управление */
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .control-button {
-            background: rgba(52, 73, 94, 0.7);
-            border: none;
-            border-radius: 10px;
-            padding: 15px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .control-button:hover {
-            background: rgba(52, 73, 94, 0.9);
-            transform: translateY(-2px);
-        }
-
-        .control-button.active {
-            background: rgba(41, 128, 185, 0.9);
-            border-color: #3498db;
-        }
-
-        .control-button.warning {
-            background: rgba(231, 76, 60, 0.8);
-        }
-
-        .control-button.warning:hover {
-            background: rgba(231, 76, 60, 0.9);
-        }
-
-        /* Графики */
-        .charts {
-            grid-column: 1 / -1;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 1024px) {
-            .charts {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .chart-container {
-            background: rgba(25, 42, 86, 0.7);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .chart-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .chart {
-            height: 200px;
-            position: relative;
-        }
-
-        .chart-line {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 80%;
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-        }
-
-        .chart-bar {
-            width: 30px;
-            background: #4a69bd;
-            border-radius: 5px 5px 0 0;
-            transition: height 1s ease;
-            position: relative;
-        }
-
-        .chart-bar.gas {
-            background: #3498db;
-        }
-
-        .chart-bar.oil {
-            background: #f1c40f;
-        }
-
-        .chart-bar.water {
-            background: #27ae60;
-        }
-
-        .chart-label {
-            position: absolute;
-            bottom: -25px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        /* Аварии и события */
-        .alarms {
-            margin-top: 30px;
-        }
-
-        .alarms-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .alarm-item {
-            background: rgba(231, 76, 60, 0.2);
-            border-left: 4px solid #e74c3c;
-            padding: 12px 15px;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .alarm-item.normal {
-            background: rgba(46, 204, 113, 0.2);
-            border-left-color: #2ecc71;
-        }
-
-        .alarm-time {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .alarm-text {
-            font-weight: 500;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        /* Анимации */
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Цифровой двойник трёхфазного сепаратора</title>
+  <style>
+    :root {
+      --bg: #111820;
+      --panel: #1b2634;
+      --panel-2: #0f1823;
+      --accent: #4fa3ff;
+      --oil: #111;
+      --water: #1f6bff;
+      --gas: #d6d6d6;
+      --danger: #ff4d4f;
+      --ok: #4caf50;
+      --pipe-blue: #0540c8;
+      --pipe-black: #111;
+      --pipe-yellow: #d6b600;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: #e9eef5;
+      overflow-x: hidden;
+    }
+    h1, h2, h3 { margin: 0; }
+    .page {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: var(--panel);
+      padding: 18px;
+      border-right: 1px solid #243244;
+    }
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+    .tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tab-btn {
+      border: 1px solid #2f4054;
+      background: #152033;
+      color: #dce5f1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: #235dac;
+      border-color: #3f7bd8;
+      box-shadow: 0 0 12px rgba(79, 163, 255, 0.35);
+    }
+    .tab-content {
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--panel-2);
+      border: 1px solid #1f2c3c;
+      border-radius: 12px;
+      display: none;
+      gap: 12px;
+    }
+    .tab-content.active { display: grid; }
+    .control {
+      display: grid;
+      gap: 6px;
+    }
+    .control label {
+      font-size: 13px;
+      color: #cdd7e6;
+    }
+    .control input[type="range"] {
+      width: 100%;
+    }
+    .value-box {
+      background: #0c131d;
+      border: 1px solid #1d2b3a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .value-box .label {
+      color: #8fa5c2;
+    }
+    .main {
+      position: relative;
+      padding: 16px 18px 30px 18px;
+      overflow: hidden;
+    }
+    .title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 22px;
+      letter-spacing: 0.4px;
+    }
+    .sim-area {
+      position: relative;
+      background: radial-gradient(circle at 20% 20%, #1a2736, #0c1119 55%);
+      border: 1px solid #1f2c3c;
+      border-radius: 12px;
+      min-height: 540px;
+      overflow: hidden;
+    }
+    .separator {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      width: 72%;
+      height: 260px;
+      background: linear-gradient(180deg, #7f858e 0%, #6c737c 100%);
+      border-radius: 30px;
+      border: 3px solid #50545d;
+      box-shadow: inset 0 0 0 10px #888e98, 0 25px 35px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .separator::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 2px dashed rgba(255,255,255,0.18);
+      border-radius: 22px;
+      pointer-events: none;
+    }
+    .phase-layer {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      transition: height 0.6s ease;
+      border-radius: 16px 16px 6px 6px;
+      overflow: hidden;
+    }
+    .water {
+      bottom: 10px;
+      background: linear-gradient(180deg, #2f8cff 0%, #0d57c7 100%);
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.35);
+    }
+    .oil {
+      bottom: 10px;
+      background: linear-gradient(180deg, #141414 0%, #050505 70%);
+      box-shadow: inset 0 0 22px rgba(255,255,255,0.08);
+    }
+    .gas {
+      top: 10px;
+      background: repeating-radial-gradient(circle at 15% 25%, rgba(255,255,255,0.25) 0 4px, rgba(0,0,0,0) 4px 16px),
+                  repeating-radial-gradient(circle at 75% 35%, rgba(255,255,255,0.2) 0 3px, rgba(0,0,0,0) 4px 18px),
+                  linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(210,210,210,0.5) 100%);
+      animation: bubbles 6s infinite linear;
+      opacity: 0.92;
+    }
+    @keyframes bubbles {
+      0% { background-position: 0 0, 0 0, 0 0; }
+      100% { background-position: 0 -120px, 0 -100px, 0 0; }
+    }
+    .pipe {
+      position: absolute;
+      height: 14px;
+      background: #b9c2cf;
+      border-radius: 6px;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+    .pipe.vertical {
+      width: 14px;
+    }
+    .pipe .flow {
+      position: absolute;
+      inset: 0;
+      background-size: 30px 14px;
+      background-repeat: repeat-x;
+      animation: flow 1s linear infinite;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .pipe.active .flow { opacity: 1; }
+    @keyframes flow {
+      from { background-position-x: 0; }
+      to { background-position-x: 30px; }
+    }
+    .pipe-blue { background: #0c3faf; }
+    .pipe-blue .flow { background-image: linear-gradient(90deg, rgba(255,255,255,0.1) 0 50%, transparent 50% 100%); }
+    .pipe-black { background: #0a0a0a; }
+    .pipe-black .flow { background-image: linear-gradient(90deg, rgba(255,255,255,0.18) 0 50%, transparent 50% 100%); }
+    .pipe-yellow { background: #c0a000; }
+    .pipe-yellow .flow { background-image: linear-gradient(90deg, rgba(255,255,255,0.2) 0 50%, transparent 50% 100%); }
+    .valve {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      background: #dfe6ee;
+      border-radius: 10px;
+      border: 3px solid #8c9bb0;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.35);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      color: #0d1522;
+      user-select: none;
+    }
+    .valve.open { background: #9ee1a1; border-color: #5abf60; }
+    .valve-label {
+      position: absolute;
+      top: 36px;
+      font-size: 12px;
+      color: #cdd7e6;
+      width: 120px;
+      text-align: center;
+    }
+    .pump {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #7aa3ff, #1f3f8c 70%);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+      left: 6%;
+      top: 58%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      border: 3px solid #9fb9ff;
+    }
+    .pump::after {
+      content: "Насос";
+      position: absolute;
+      bottom: -22px;
+      font-size: 12px;
+      color: #cdd7e6;
+    }
+    .gauge {
+      position: absolute;
+      top: 32%;
+      left: 44%;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 5px solid #b0c4de;
+      background: #0f1823;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      color: #dbe5f5;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    }
+    .readouts {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      display: grid;
+      gap: 8px;
+      min-width: 180px;
+    }
+    .pill {
+      background: #122030;
+      border: 1px solid #203143;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .pill span:last-child { color: #9fd1ff; }
+    .alert {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      min-width: 260px;
+      padding: 12px 14px;
+      background: rgba(255, 77, 79, 0.9);
+      border: 2px solid #ffb3b4;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      display: none;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      background: #132236;
+      border: 1px solid #203143;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-oil-can"></i>
-                <div>
-                    <h1>Цифровой двойник <span>Подготовки нефти, газа и воды</span></h1>
-                    <p>Мониторинг и управление процессом сепарации</p>
-                </div>
-            </div>
-            <div class="time-display">
-                <i class="far fa-clock"></i>
-                <span id="current-time">10:45:23</span>
-                <span id="current-date">10 декабря 2025</span>
-            </div>
-        </header>
+  <div class="page">
+    <aside class="sidebar">
+      <h2>Управление клапанами</h2>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="pressure">Клапан регулятора давления</button>
+        <button class="tab-btn" data-tab="water">Клапан регулятора уровня воды в основной камере</button>
+        <button class="tab-btn" data-tab="oil">Клапан регулятора уровня нефти в основной камере</button>
+      </div>
+      <div id="pressure" class="tab-content active">
+        <div class="control">
+          <label>Шкала открытия клапана (Kvs): <span id="kvsVal">0.5</span></label>
+          <input type="range" id="kvs" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="control">
+          <label>Шкала расхода жидкости Q (м³/сут): <span id="flowVal">100</span></label>
+          <input type="range" id="flow" min="100" max="1000" step="10" value="100">
+        </div>
+        <div class="value-box">
+          <span class="label">Давление:</span>
+          <span id="pressureOut">0</span>
+        </div>
+      </div>
+      <div id="water" class="tab-content">
+        <div class="control">
+          <label>Коэффициент пропускной способности клапана (Cv), м³/ч: <span id="waterCvVal">20</span></label>
+          <input type="range" id="waterCv" min="0" max="56" step="1" value="20">
+        </div>
+        <div class="control">
+          <label>Перепад давления на клапане (ΔP), бар: <span id="waterDpVal">4</span></label>
+          <input type="range" id="waterDp" min="0" max="8.5" step="0.1" value="4">
+        </div>
+        <div class="control">
+          <label>Степень открытия клапана (u): <span id="waterUVal">0.5</span></label>
+          <input type="range" id="waterU" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="value-box">
+          <span class="label">Обводнённость Q (%):</span>
+          <span id="waterQ">0</span>
+        </div>
+      </div>
+      <div id="oil" class="tab-content">
+        <div class="control">
+          <label>Коэффициент пропускной способности клапана (Cv), м³/ч: <span id="oilCvVal">20</span></label>
+          <input type="range" id="oilCv" min="0" max="56" step="1" value="20">
+        </div>
+        <div class="control">
+          <label>Перепад давления на клапане (ΔP), бар: <span id="oilDpVal">4</span></label>
+          <input type="range" id="oilDp" min="0" max="8.5" step="0.1" value="4">
+        </div>
+        <div class="control">
+          <label>Степень открытия клапана (u): <span id="oilUVal">0.5</span></label>
+          <input type="range" id="oilU" min="0" max="1" step="0.01" value="0.5">
+        </div>
+        <div class="value-box">
+          <span class="label">Уровень нефти Q (%):</span>
+          <span id="oilQ">0</span>
+        </div>
+      </div>
+    </aside>
 
-        <main>
-            <div class="dashboard">
-                <!-- Левая панель - Показатели -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-chart-line"></i>
-                        <h2>Показатели процесса</h2>
-                    </div>
-                    <div class="indicators">
-                        <div class="indicator">
-                            <div class="indicator-header">
-                                <div class="indicator-name">
-                                    <i class="fas fa-wind"></i>
-                                    <span>Давление газа</span>
-                                </div>
-                                <div class="indicator-value" id="gas-pressure">8.5 бар</div>
-                            </div>
-                            <div class="indicator-bar">
-                                <div class="indicator-fill gas-fill" id="gas-pressure-bar" style="width: 85%"></div>
-                            </div>
-                        </div>
-                        <div class="indicator">
-                            <div class="indicator-header">
-                                <div class="indicator-name">
-                                    <i class="fas fa-oil-can"></i>
-                                    <span>Уровень нефти</span>
-                                </div>
-                                <div class="indicator-value" id="oil-level">52.3%</div>
-                            </div>
-                            <div class="indicator-bar">
-                                <div class="indicator-fill oil-fill" id="oil-level-bar" style="width: 52%"></div>
-                            </div>
-                        </div>
-                        <div class="indicator">
-                            <div class="indicator-header">
-                                <div class="indicator-name">
-                                    <i class="fas fa-tint"></i>
-                                    <span>Уровень воды</span>
-                                </div>
-                                <div class="indicator-value" id="water-level">25.1%</div>
-                            </div>
-                            <div class="indicator-bar">
-                                <div class="indicator-fill water-fill" id="water-level-bar" style="width: 25%"></div>
-                            </div>
-                        </div>
-                        <div class="indicator">
-                            <div class="indicator-header">
-                                <div class="indicator-name">
-                                    <i class="fas fa-thermometer-half"></i>
-                                    <span>Температура</span>
-                                </div>
-                                <div class="indicator-value" id="temperature">45.6°C</div>
-                            </div>
-                            <div class="indicator-bar">
-                                <div class="indicator-fill gas-fill" id="temperature-bar" style="width: 65%"></div>
-                            </div>
-                        </div>
-                        <div class="indicator">
-                            <div class="indicator-header">
-                                <div class="indicator-name">
-                                    <i class="fas fa-tachometer-alt"></i>
-                                    <span>Расход сырья</span>
-                                </div>
-                                <div class="indicator-value" id="feed-flow">156.7 м³/ч</div>
-                            </div>
-                            <div class="indicator-bar">
-                                <div class="indicator-fill oil-fill" id="feed-flow-bar" style="width: 78%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <main class="main">
+      <div class="title">Цифровой двойник</div>
+      <div class="sim-area">
+        <div class="separator" id="separator">
+          <div class="phase-layer water" id="waterLayer" style="height:30%;"></div>
+          <div class="phase-layer oil" id="oilLayer" style="height:30%;"></div>
+          <div class="phase-layer gas" id="gasLayer" style="height:40%;"></div>
+        </div>
 
-                <!-- Центральная панель - Сепаратор -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-industry"></i>
-                        <h2>Трехфазный сепаратор SEP-101</h2>
-                    </div>
-                    <div class="separator-container">
-                        <div class="separator" id="separator">
-                            <div class="separator-levels">
-                                <div class="separator-level"><span>100%</span></div>
-                                <div class="separator-level"><span>75%</span></div>
-                                <div class="separator-level"><span>50%</span></div>
-                                <div class="separator-level"><span>25%</span></div>
-                                <div class="separator-level"><span>0%</span></div>
-                            </div>
-                            <div class="separator-connectors">
-                                <div class="connector connector-in"></div>
-                                <div class="connector connector-gas"></div>
-                                <div class="connector connector-oil"></div>
-                                <div class="connector connector-water"></div>
-                                
-                                <div class="connector-label in-label">Сырье</div>
-                                <div class="connector-label gas-label">Газ</div>
-                                <div class="connector-label oil-label">Нефть</div>
-                                <div class="connector-label water-label">Вода</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="pump" id="pump">+</div>
 
-                <!-- Правая панель - Управление -->
-                <div class="panel">
-                    <div class="panel-title">
-                        <i class="fas fa-cogs"></i>
-                        <h2>Управление процессом</h2>
-                    </div>
-                    <div class="controls">
-                        <div class="control-group">
-                            <button class="control-button active" id="power-btn">
-                                <i class="fas fa-power-off"></i>
-                                <span>Включить</span>
-                            </button>
-                            <button class="control-button" id="auto-mode-btn">
-                                <i class="fas fa-robot"></i>
-                                <span>Автоматический режим</span>
-                            </button>
-                            <button class="control-button" id="manual-mode-btn">
-                                <i class="fas fa-hand-paper"></i>
-                                <span>Ручной режим</span>
-                            </button>
-                        </div>
-                        <div class="control-group">
-                            <button class="control-button" id="valve-gas-btn">
-                                <i class="fas fa-wind"></i>
-                                <span>Клапан газа</span>
-                            </button>
-                            <button class="control-button" id="valve-oil-btn">
-                                <i class="fas fa-oil-can"></i>
-                                <span>Клапан нефти</span>
-                            </button>
-                            <button class="control-button" id="valve-water-btn">
-                                <i class="fas fa-tint"></i>
-                                <span>Клапан воды</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="alarms">
-                        <div class="panel-title">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h2>Аварии и события</h2>
-                        </div>
-                        <div class="alarms-list" id="alarms-list">
-                            <div class="alarm-item normal">
-                                <div class="alarm-text">Система работает нормально</div>
-                                <div class="alarm-time" id="alarm-time-1">10:42:15</div>
-                            </div>
-                            <div class="alarm-item">
-                                <div class="alarm-text">Давление газа выше нормы</div>
-                                <div class="alarm-time">10:30:22</div>
-                            </div>
-                            <div class="alarm-item normal">
-                                <div class="alarm-text">Клапан нефти открыт</div>
-                                <div class="alarm-time">10:25:10</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="pipe" id="inletPipe" style="left: 3%; top: 56%; width: 32%; height: 14px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical" style="left: 35%; top: 43%; height: 60px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-blue" id="waterPipe" style="left: 20%; bottom: 14%; width: 26%; height: 14px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-blue" style="left: 46%; bottom: 14%; height: 90px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-blue" id="waterPipe2" style="left: 46%; bottom: 24%; width: 16%; height: 14px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 16%; width: 22%; height: 14px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-black" style="right: 30%; bottom: 16%; height: 90px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-black" id="oilPipe2" style="right: 30%; bottom: 24%; width: 16%; height: 14px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-yellow" id="gasPipe" style="right: 12%; top: 22%; width: 18%; height: 14px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-yellow" style="right: 30%; top: 22%; height: 50px;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-yellow" id="gasPipe2" style="right: 30%; top: 28%; width: 16%; height: 14px;">
+          <div class="flow"></div>
+        </div>
 
-            <!-- Графики -->
-            <div class="charts">
-                <div class="chart-container">
-                    <div class="chart-title">
-                        <i class="fas fa-wind"></i>
-                        <span>Расход газа, м³/ч</span>
-                    </div>
-                    <div class="chart">
-                        <div class="chart-line" id="gas-chart">
-                            <!-- Будет заполнено скриптом -->
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">
-                        <i class="fas fa-oil-can"></i>
-                        <span>Расход нефти, м³/ч</span>
-                    </div>
-                    <div class="chart">
-                        <div class="chart-line" id="oil-chart">
-                            <!-- Будет заполнено скриптом -->
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">
-                        <i class="fas fa-tint"></i>
-                        <span>Расход воды, м³/ч</span>
-                    </div>
-                    <div class="chart">
-                        <div class="chart-line" id="water-chart">
-                            <!-- Будет заполнено скриптом -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+        <div class="valve open" id="waterValve" style="left: 40%; bottom: 14%;">H2O</div>
+        <div class="valve-label" style="left: 30%; bottom: -2%;">Клапан воды</div>
 
-        <footer>
-            <p>Цифровой двойник системы подготовки нефти, газа и воды | Моделирование в реальном времени</p>
-            <p>© 2025 Нефтегазовые технологии. Все права защищены.</p>
-        </footer>
-    </div>
+        <div class="valve open" id="oilValve" style="right: 22%; bottom: 16%;">Oil</div>
+        <div class="valve-label" style="right: 8%; bottom: 2%;">Клапан нефти</div>
 
-    <script>
-        // Обновление времени
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ru-RU');
-            const dateString = now.toLocaleDateString('ru-RU', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            document.getElementById('current-time').textContent = timeString;
-            document.getElementById('current-date').textContent = dateString;
-        }
-        
-        setInterval(updateTime, 1000);
-        updateTime();
-        
-        // Имитация изменения данных
-        function simulateData() {
-            // Случайные изменения показателей
-            const gasPressure = 8.0 + Math.random() * 1.5;
-            const oilLevel = 45 + Math.random() * 15;
-            const waterLevel = 20 + Math.random() * 15;
-            const temperature = 40 + Math.random() * 12;
-            const feedFlow = 140 + Math.random() * 40;
-            
-            // Обновление значений
-            document.getElementById('gas-pressure').textContent = gasPressure.toFixed(1) + ' бар';
-            document.getElementById('oil-level').textContent = oilLevel.toFixed(1) + '%';
-            document.getElementById('water-level').textContent = waterLevel.toFixed(1) + '%';
-            document.getElementById('temperature').textContent = temperature.toFixed(1) + '°C';
-            document.getElementById('feed-flow').textContent = feedFlow.toFixed(1) + ' м³/ч';
-            
-            // Обновление индикаторов
-            document.getElementById('gas-pressure-bar').style.width = (gasPressure / 10 * 100) + '%';
-            document.getElementById('oil-level-bar').style.width = oilLevel + '%';
-            document.getElementById('water-level-bar').style.width = waterLevel + '%';
-            document.getElementById('temperature-bar').style.width = (temperature / 70 * 100) + '%';
-            document.getElementById('feed-flow-bar').style.width = (feedFlow / 200 * 100) + '%';
-            
-            // Обновление уровней в сепараторе
-            const separator = document.getElementById('separator');
-            separator.style.setProperty('--gas-level', (100 - oilLevel) + '%');
-            separator.style.setProperty('--oil-level', oilLevel + '%');
-            separator.style.setProperty('--water-level', waterLevel + '%');
-            
-            // Обновление графиков
-            updateCharts();
-        }
-        
-        // Инициализация графиков
-        function initCharts() {
-            const gasChart = document.getElementById('gas-chart');
-            const oilChart = document.getElementById('oil-chart');
-            const waterChart = document.getElementById('water-chart');
-            
-            const labels = ['05:00', '07:00', '09:00', '11:00', '13:00', '15:00'];
-            
-            // Очистка графиков
-            gasChart.innerHTML = '';
-            oilChart.innerHTML = '';
-            waterChart.innerHTML = '';
-            
-            // Создание столбцов для графиков
-            for (let i = 0; i < 6; i++) {
-                // Газ
-                const gasBar = document.createElement('div');
-                gasBar.className = 'chart-bar gas';
-                gasBar.style.height = (30 + Math.random() * 70) + '%';
-                gasChart.appendChild(gasBar);
-                
-                const gasLabel = document.createElement('div');
-                gasLabel.className = 'chart-label';
-                gasLabel.textContent = labels[i];
-                gasBar.appendChild(gasLabel);
-                
-                // Нефть
-                const oilBar = document.createElement('div');
-                oilBar.className = 'chart-bar oil';
-                oilBar.style.height = (40 + Math.random() * 60) + '%';
-                oilChart.appendChild(oilBar);
-                
-                const oilLabel = document.createElement('div');
-                oilLabel.className = 'chart-label';
-                oilLabel.textContent = labels[i];
-                oilBar.appendChild(oilLabel);
-                
-                // Вода
-                const waterBar = document.createElement('div');
-                waterBar.className = 'chart-bar water';
-                waterBar.style.height = (20 + Math.random() * 50) + '%';
-                waterChart.appendChild(waterBar);
-                
-                const waterLabel = document.createElement('div');
-                waterLabel.className = 'chart-label';
-                waterLabel.textContent = labels[i];
-                waterBar.appendChild(waterLabel);
-            }
-        }
-        
-        // Обновление графиков
-        function updateCharts() {
-            const gasBars = document.querySelectorAll('#gas-chart .chart-bar');
-            const oilBars = document.querySelectorAll('#oil-chart .chart-bar');
-            const waterBars = document.querySelectorAll('#water-chart .chart-bar');
-            
-            // Обновляем последний столбец в каждом графике
-            if (gasBars.length > 0) {
-                const lastGasBar = gasBars[gasBars.length - 1];
-                lastGasBar.style.height = (30 + Math.random() * 70) + '%';
-            }
-            
-            if (oilBars.length > 0) {
-                const lastOilBar = oilBars[oilBars.length - 1];
-                lastOilBar.style.height = (40 + Math.random() * 60) + '%';
-            }
-            
-            if (waterBars.length > 0) {
-                const lastWaterBar = waterBars[waterBars.length - 1];
-                lastWaterBar.style.height = (20 + Math.random() * 50) + '%';
-            }
-        }
-        
-        // Управление кнопками
-        document.getElementById('power-btn').addEventListener('click', function() {
-            this.classList.toggle('active');
-            this.classList.toggle('warning');
-            
-            if (this.classList.contains('active')) {
-                this.innerHTML = '<i class="fas fa-power-off"></i><span>Включить</span>';
-                document.getElementById('alarm-time-1').textContent = 
-                    new Date().toLocaleTimeString('ru-RU').substring(0, 8);
-            } else {
-                this.innerHTML = '<i class="fas fa-power-off"></i><span>Выключить</span>';
-                
-                // Добавляем событие в лог
-                const alarmsList = document.getElementById('alarms-list');
-                const newAlarm = document.createElement('div');
-                newAlarm.className = 'alarm-item';
-                newAlarm.innerHTML = `
-                    <div class="alarm-text">Система выключена оператором</div>
-                    <div class="alarm-time">${new Date().toLocaleTimeString('ru-RU').substring(0, 8)}</div>
-                `;
-                alarmsList.insertBefore(newAlarm, alarmsList.firstChild);
-                
-                // Ограничиваем количество событий в логе
-                if (alarmsList.children.length > 5) {
-                    alarmsList.removeChild(alarmsList.lastChild);
-                }
-            }
-        });
-        
-        document.getElementById('auto-mode-btn').addEventListener('click', function() {
-            this.classList.add('active');
-            document.getElementById('manual-mode-btn').classList.remove('active');
-        });
-        
-        document.getElementById('manual-mode-btn').addEventListener('click', function() {
-            this.classList.add('active');
-            document.getElementById('auto-mode-btn').classList.remove('active');
-        });
-        
-        // Управление клапанами
-        const valveButtons = ['valve-gas-btn', 'valve-oil-btn', 'valve-water-btn'];
-        valveButtons.forEach(btnId => {
-            document.getElementById(btnId).addEventListener('click', function() {
-                this.classList.toggle('active');
-            });
-        });
-        
-        // Имитация случайных аварий
-        function simulateAlarms() {
-            if (Math.random() > 0.7) {
-                const alarms = [
-                    "Давление в сепараторе превышено",
-                    "Температура на входе выше нормы",
-                    "Уровень нефти приближается к максимуму",
-                    "Сбой датчика расхода воды",
-                    "Падение давления газа"
-                ];
-                
-                const randomAlarm = alarms[Math.floor(Math.random() * alarms.length)];
-                
-                const alarmsList = document.getElementById('alarms-list');
-                const newAlarm = document.createElement('div');
-                newAlarm.className = 'alarm-item';
-                newAlarm.innerHTML = `
-                    <div class="alarm-text">${randomAlarm}</div>
-                    <div class="alarm-time">${new Date().toLocaleTimeString('ru-RU').substring(0, 8)}</div>
-                `;
-                alarmsList.insertBefore(newAlarm, alarmsList.firstChild);
-                
-                // Ограничиваем количество событий в логе
-                if (alarmsList.children.length > 5) {
-                    alarmsList.removeChild(alarmsList.lastChild);
-                }
-                
-                // Мигание предупреждения
-                newAlarm.classList.add('pulse');
-                setTimeout(() => {
-                    newAlarm.classList.remove('pulse');
-                }, 5000);
-            }
-        }
-        
-        // Инициализация
-        initCharts();
-        simulateData();
-        
-        // Запуск симуляции
-        setInterval(simulateData, 3000);
-        setInterval(simulateAlarms, 10000);
-        
-        // Показать приветственное сообщение
-        setTimeout(() => {
-            alert("Добро пожаловать в цифровой двойник системы подготовки нефти, газа и воды!\n\nСистема имитирует работу трехфазного сепаратора. Показатели обновляются в реальном времени. Вы можете управлять процессом с помощью панели управления.");
-        }, 1000);
-    </script>
+        <div class="valve open" id="gasValve" style="right: 22%; top: 16%;">Gas</div>
+        <div class="valve-label" style="right: 6%; top: 2%;">Клапан газа</div>
+
+        <div class="gauge">
+          <div style="text-align:center">
+            Давление<br><span id="gaugePressure">0</span>
+          </div>
+        </div>
+
+        <div class="readouts">
+          <div class="pill">Газ: <span id="gasLevelText">40%</span></div>
+          <div class="pill">Нефть: <span id="oilLevelText">30%</span></div>
+          <div class="pill">Вода: <span id="waterLevelText">30%</span></div>
+          <div class="pill">Расход на входе: <span id="inletFlowText">200 м³/сут</span></div>
+        </div>
+
+        <div class="alert" id="alertBox">Авария</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabs.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    const state = {
+      kvs: 0.5,
+      flow: 100,
+      inletFlow: 200,
+      waterCv: 20,
+      waterDp: 4,
+      waterU: 0.5,
+      oilCv: 20,
+      oilDp: 4,
+      oilU: 0.5,
+      waterValve: true,
+      oilValve: true,
+      gasValve: true,
+      waterLevel: 30,
+      oilLevel: 30,
+      gasLevel: 40
+    };
+
+    const el = {
+      kvs: document.getElementById('kvs'),
+      flow: document.getElementById('flow'),
+      kvsVal: document.getElementById('kvsVal'),
+      flowVal: document.getElementById('flowVal'),
+      pressureOut: document.getElementById('pressureOut'),
+      waterCv: document.getElementById('waterCv'),
+      waterDp: document.getElementById('waterDp'),
+      waterU: document.getElementById('waterU'),
+      waterCvVal: document.getElementById('waterCvVal'),
+      waterDpVal: document.getElementById('waterDpVal'),
+      waterUVal: document.getElementById('waterUVal'),
+      waterQ: document.getElementById('waterQ'),
+      oilCv: document.getElementById('oilCv'),
+      oilDp: document.getElementById('oilDp'),
+      oilU: document.getElementById('oilU'),
+      oilCvVal: document.getElementById('oilCvVal'),
+      oilDpVal: document.getElementById('oilDpVal'),
+      oilUVal: document.getElementById('oilUVal'),
+      oilQ: document.getElementById('oilQ'),
+      gaugePressure: document.getElementById('gaugePressure'),
+      waterLayer: document.getElementById('waterLayer'),
+      oilLayer: document.getElementById('oilLayer'),
+      gasLayer: document.getElementById('gasLayer'),
+      gasLevelText: document.getElementById('gasLevelText'),
+      oilLevelText: document.getElementById('oilLevelText'),
+      waterLevelText: document.getElementById('waterLevelText'),
+      inletFlowText: document.getElementById('inletFlowText'),
+      alert: document.getElementById('alertBox'),
+      waterValve: document.getElementById('waterValve'),
+      oilValve: document.getElementById('oilValve'),
+      gasValve: document.getElementById('gasValve'),
+      pump: document.getElementById('pump'),
+      inletPipe: document.getElementById('inletPipe'),
+      waterPipe: document.getElementById('waterPipe'),
+      waterPipe2: document.getElementById('waterPipe2'),
+      oilPipe: document.getElementById('oilPipe'),
+      oilPipe2: document.getElementById('oilPipe2'),
+      gasPipe: document.getElementById('gasPipe'),
+      gasPipe2: document.getElementById('gasPipe2')
+    };
+
+    const format = (v, digits = 1) => Number(v).toFixed(digits);
+
+    function updatePressure() {
+      const p = state.kvs * Math.pow(state.flow, 2);
+      el.pressureOut.textContent = format(p, 0) + " усл.ед.";
+      el.gaugePressure.textContent = format(p, 0);
+    }
+
+    function calcWaterQ() {
+      const q = state.waterCv * state.waterU * Math.sqrt(state.waterDp || 0);
+      el.waterQ.textContent = format(q, 1) + " %";
+      if (q > 70) showAlert("Авария: обводнённость > 70%. Откройте клапан и сбросьте воду.");
+      else if (q < 30) showAlert("Авария: обводнённость < 30%. Прикройте клапан.");
+      return q;
+    }
+
+    function calcOilQ() {
+      const q = state.oilCv * state.oilU * Math.sqrt(state.oilDp || 0);
+      el.oilQ.textContent = format(q, 2) + " %";
+      if (q > 15) showAlert("Авария: уровень нефти > 15%. Откройте клапан нефти.");
+      else if (q < 0.5) showAlert("Авария: уровень нефти < 0.5%. Закройте клапан нефти.");
+      return q;
+    }
+
+    let alertTimer;
+    function showAlert(msg) {
+      el.alert.textContent = msg;
+      el.alert.style.display = "block";
+      clearTimeout(alertTimer);
+      alertTimer = setTimeout(() => { el.alert.style.display = "none"; }, 4000);
+    }
+
+    function updateLevels() {
+      const total = state.waterLevel + state.oilLevel + state.gasLevel;
+      if (total > 100) {
+        const k = 100 / total;
+        state.waterLevel *= k;
+        state.oilLevel *= k;
+        state.gasLevel *= k;
+      }
+      el.waterLayer.style.height = state.waterLevel + "%";
+      el.oilLayer.style.height = state.oilLevel + "%";
+      el.oilLayer.style.bottom = state.waterLevel + "%";
+      el.gasLayer.style.height = state.gasLevel + "%";
+      el.gasLayer.style.top = "10px";
+
+      el.waterLevelText.textContent = format(state.waterLevel, 1) + "%";
+      el.oilLevelText.textContent = format(state.oilLevel, 1) + "%";
+      el.gasLevelText.textContent = format(state.gasLevel, 1) + "%";
+    }
+
+    function tick() {
+      // Inflow emulsion splits into phases
+      const inflow = state.inletFlow / 1000;
+      state.waterLevel += inflow * 0.35;
+      state.oilLevel += inflow * 0.4;
+      state.gasLevel += inflow * 0.25;
+
+      // Drains if valves are open
+      if (state.waterValve) state.waterLevel -= 0.35;
+      else state.waterLevel += 0.4;
+
+      if (state.oilValve) state.oilLevel -= 0.3;
+      else state.oilLevel += 0.35;
+
+      if (state.gasValve) state.gasLevel -= 0.25;
+      else state.gasLevel += 0.3;
+
+      // Clamp to safe ranges
+      state.waterLevel = Math.max(5, Math.min(80, state.waterLevel));
+      state.oilLevel = Math.max(5, Math.min(80, state.oilLevel));
+      state.gasLevel = Math.max(5, Math.min(80, state.gasLevel));
+
+      // Alert logic by levels
+      if (!state.waterValve && state.waterLevel > 65) {
+        showAlert("Авария: уровень воды растёт, откройте водяной клапан!");
+      }
+      if (!state.oilValve && state.oilLevel > 55) {
+        showAlert("Авария: уровень нефти растёт, откройте нефтяной клапан!");
+      }
+      if (!state.gasValve && state.gasLevel > 60) {
+        showAlert("Авария: уровень газа растёт, откройте газовый клапан!");
+      }
+
+      updateLevels();
+    }
+
+    function updateValveUI() {
+      const toggleClass = (node, open) => {
+        node.classList.toggle('open', open);
+        node.querySelectorAll('.flow')?.forEach(f => f.parentElement.classList.toggle('active', open));
+      };
+      el.waterValve.classList.toggle('open', state.waterValve);
+      el.oilValve.classList.toggle('open', state.oilValve);
+      el.gasValve.classList.toggle('open', state.gasValve);
+
+      [el.waterPipe, el.waterPipe2].forEach(p => p.classList.toggle('active', state.waterValve));
+      [el.oilPipe, el.oilPipe2].forEach(p => p.classList.toggle('active', state.oilValve));
+      [el.gasPipe, el.gasPipe2].forEach(p => p.classList.toggle('active', state.gasValve));
+    }
+
+    // Inputs wiring
+    el.kvs.addEventListener('input', e => {
+      state.kvs = Number(e.target.value);
+      el.kvsVal.textContent = e.target.value;
+      updatePressure();
+    });
+    el.flow.addEventListener('input', e => {
+      state.flow = Number(e.target.value);
+      el.flowVal.textContent = e.target.value;
+      updatePressure();
+    });
+
+    el.waterCv.addEventListener('input', e => {
+      state.waterCv = Number(e.target.value);
+      el.waterCvVal.textContent = e.target.value;
+      calcWaterQ();
+    });
+    el.waterDp.addEventListener('input', e => {
+      state.waterDp = Number(e.target.value);
+      el.waterDpVal.textContent = e.target.value;
+      calcWaterQ();
+    });
+    el.waterU.addEventListener('input', e => {
+      state.waterU = Number(e.target.value);
+      el.waterUVal.textContent = e.target.value;
+      calcWaterQ();
+    });
+
+    el.oilCv.addEventListener('input', e => {
+      state.oilCv = Number(e.target.value);
+      el.oilCvVal.textContent = e.target.value;
+      calcOilQ();
+    });
+    el.oilDp.addEventListener('input', e => {
+      state.oilDp = Number(e.target.value);
+      el.oilDpVal.textContent = e.target.value;
+      calcOilQ();
+    });
+    el.oilU.addEventListener('input', e => {
+      state.oilU = Number(e.target.value);
+      el.oilUVal.textContent = e.target.value;
+      calcOilQ();
+    });
+
+    el.waterValve.addEventListener('click', () => {
+      state.waterValve = !state.waterValve;
+      updateValveUI();
+    });
+    el.oilValve.addEventListener('click', () => {
+      state.oilValve = !state.oilValve;
+      updateValveUI();
+    });
+    el.gasValve.addEventListener('click', () => {
+      state.gasValve = !state.gasValve;
+      updateValveUI();
+    });
+
+    el.pump.addEventListener('click', () => {
+      state.inletFlow = Math.min(1000, state.inletFlow + 50);
+      el.inletFlowText.textContent = state.inletFlow + " м³/сут";
+      el.inletPipe.classList.add('active');
+      showAlert("Насос увеличил подачу: " + state.inletFlow + " м³/сут");
+      setTimeout(() => el.inletPipe.classList.remove('active'), 1500);
+    });
+
+    function init() {
+      updatePressure();
+      calcWaterQ();
+      calcOilQ();
+      updateLevels();
+      updateValveUI();
+      el.inletFlowText.textContent = state.inletFlow + " м³/сут";
+      setInterval(tick, 900);
+    }
+    init();
+  </script>
 </body>
 </html>
+
