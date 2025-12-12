@@ -36,20 +36,17 @@
       <!-- Вкладка: Регулятор воды -->
       <div id="water" class="tab-content">
         <div class="control">
-          <label>Коэффициент пропускной способности (Cv), м³/ч: <span id="waterCvVal">20</span></label>
-          <input type="range" id="waterCv" min="0" max="56" step="1" value="20">
+          <label>Степень открытия клапана (К): <span id="waterKVal">0.5</span></label>
+          <input type="range" id="waterK" min="0" max="1" step="0.01" value="0.5">
+          <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
         </div>
         <div class="control">
-          <label>Перепад давления (ΔP), бар: <span id="waterDpVal">4</span></label>
-          <input type="range" id="waterDp" min="0" max="8.5" step="0.1" value="4">
+          <label>Расход жидкости Q (м³/сут): <span id="waterQVal">100</span></label>
+          <input type="range" id="waterQ" min="100" max="1000" step="10" value="100">
         </div>
-        <div class="control">
-          <label>Степень открытия клапана (u): <span id="waterUVal">0.5</span></label>
-          <input type="range" id="waterU" min="0" max="1" step="0.01" value="0.5">
-        </div>
-        <div class="value-box">
-          <span class="label">Обводнённость Q (%):</span>
-          <span id="waterQ">0</span>
+        <div class="value-box large">
+          <span class="label">Уровень воды:</span>
+          <span id="waterLevel" class="large-value">0 мм</span>
         </div>
       </div>
       

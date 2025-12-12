@@ -12,10 +12,9 @@ class SeparatorModel {
       flow: 100,          // Расход жидкости (м³/сут)
       inletFlow: 200,     // Входной поток (м³/сут)
       
-      // Регулятор воды
-      waterCv: 20,        // Коэффициент пропускной способности (м³/ч)
-      waterDp: 4,         // Перепад давления (бар)
-      waterU: 0.5,        // Степень открытия клапана (0-1)
+      // Регулятор воды (новые параметры)
+      waterK: 0.5,        // Степень открытия клапана (0-1)
+      waterQ: 100,        // Расход жидкости (м³/сут)
       
       // Регулятор нефти
       oilCv: 20,          // Коэффициент пропускной способности (м³/ч)
@@ -68,11 +67,28 @@ class SeparatorModel {
   }
   
   /**
-   * Расчёт обводнённости (%)
-   * Q = Cv * u * √ΔP
+   * Расчёт уровня воды в миллиметрах (мм)
+   * Формула: уровень = минимальная_высота + рабочий_диапазон × ∛((К - 0.1) / (0.9 × (1 + Q/1000)))
+   * где К - степень открытия клапана (0-1)
+   *     Q - расход жидкости (м³/сут)
    */
-  calculateWaterContent() {
-    return this.state.waterCv * this.state.waterU * Math.sqrt(this.state.waterDp || 0);
+  calculateWaterLevelMM() {
+    const K = this.state.waterK;
+    const Q = this.state.waterQ;
+    
+    const minHeight = 320;      // Минимальная высота (мм)
+    const workingRange = 2560;  // Рабочий диапазон (2880 - 320 = 2560 мм)
+    
+    // Вычисляем кубический корень из отношения
+    const numerator = K - 0.1;
+    const denominator = 0.9 * (1 + Q / 1000);
+    const ratio = numerator / denominator;
+    const cubeRoot = Math.cbrt(ratio);
+    
+    // Итоговый уровень
+    const level = minHeight + workingRange * cubeRoot;
+    
+    return level;
   }
   
   /**
@@ -403,17 +419,17 @@ class SeparatorModel {
       });
     }
     
-    // Проверка обводнённости
-    const waterContent = this.calculateWaterContent();
-    if (waterContent > 70) {
+    // Проверка уровня воды (в миллиметрах)
+    const waterLevelMM = this.calculateWaterLevelMM();
+    if (waterLevelMM > 2880) {
       alerts.push({
         type: 'critical',
-        message: 'АВАРИЯ: Обводнённость > 70%. Откройте клапан и сбросьте воду.'
+        message: 'АВАРИЯ: Уровень воды превышает 2880 мм! Откройте клапан и сбросьте воду.'
       });
-    } else if (waterContent < 30) {
+    } else if (waterLevelMM < 320) {
       alerts.push({
-        type: 'warning',
-        message: 'АВАРИЯ: Обводнённость < 30%. Прикройте клапан.'
+        type: 'critical',
+        message: 'АВАРИЯ: Уровень воды ниже 320 мм! Закройте клапан.'
       });
     }
     
@@ -503,7 +519,7 @@ class SeparatorModel {
     
     // Синхронизация со слайдером степени открытия
     if (valveType === 'water') {
-      this.state.waterU = this.state.waterValve ? 0.5 : 0;
+      this.state.waterK = this.state.waterValve ? 0.5 : 0;
     } else if (valveType === 'oil') {
       this.state.oilU = this.state.oilValve ? 0.5 : 0;
     }

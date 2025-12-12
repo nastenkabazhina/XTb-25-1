@@ -49,22 +49,10 @@ class SeparatorController {
     });
     
     // Регулятор воды
-    this.view.bindControl('waterCv', (value) => {
-      this.model.updateParameter('waterCv', value);
-      this.view.updateControlValue('waterCvVal', value);
-      this.updateWaterContent();
-    });
-    
-    this.view.bindControl('waterDp', (value) => {
-      this.model.updateParameter('waterDp', value);
-      this.view.updateControlValue('waterDpVal', value);
-      this.updateWaterContent();
-    });
-    
-    this.view.bindControl('waterU', (value) => {
-      this.model.updateParameter('waterU', value);
-      this.view.updateControlValue('waterUVal', value);
-      this.updateWaterContent();
+    this.view.bindControl('waterK', (value) => {
+      this.model.updateParameter('waterK', value);
+      this.view.updateControlValue('waterKVal', value);
+      this.updateWaterLevelMM();
       
       // Синхронизация с состоянием клапана
       const valveOpen = value > 0.1;
@@ -72,6 +60,12 @@ class SeparatorController {
         this.model.updateParameter('waterValve', valveOpen);
         this.updateValves();
       }
+    });
+    
+    this.view.bindControl('waterQ', (value) => {
+      this.model.updateParameter('waterQ', value);
+      this.view.updateControlValue('waterQVal', value);
+      this.updateWaterLevelMM();
     });
     
     // Регулятор нефти
@@ -104,8 +98,8 @@ class SeparatorController {
     this.view.bindClick('waterValve', () => {
       this.model.toggleValve('water');
       this.updateValves();
-      this.view.updateControlValue('waterU', this.model.state.waterU);
-      this.view.updateControlValue('waterUVal', this.model.state.waterU);
+      this.view.updateControlValue('waterK', this.model.state.waterK);
+      this.view.updateControlValue('waterKVal', this.model.state.waterK);
     });
     
     this.view.bindClick('oilValve', () => {
@@ -150,11 +144,11 @@ class SeparatorController {
   }
   
   /**
-   * Обновление обводнённости
+   * Обновление уровня воды (в миллиметрах)
    */
-  updateWaterContent() {
-    const content = this.model.calculateWaterContent();
-    this.view.updateWaterContent(content);
+  updateWaterLevelMM() {
+    const levelMM = this.model.calculateWaterLevelMM();
+    this.view.updateWaterLevelMM(levelMM);
     this.checkAlerts();
   }
   
@@ -223,16 +217,15 @@ class SeparatorController {
     // Обновление контролов
     this.view.updateControlValue('kvsVal', state.kvs);
     this.view.updateControlValue('flowVal', state.flow);
-    this.view.updateControlValue('waterCvVal', state.waterCv);
-    this.view.updateControlValue('waterDpVal', state.waterDp);
-    this.view.updateControlValue('waterUVal', state.waterU);
+    this.view.updateControlValue('waterKVal', state.waterK);
+    this.view.updateControlValue('waterQVal', state.waterQ);
     this.view.updateControlValue('oilCvVal', state.oilCv);
     this.view.updateControlValue('oilDpVal', state.oilDp);
     this.view.updateControlValue('oilUVal', state.oilU);
     
     // Обновление вычисляемых значений
     this.updatePressure();
-    this.updateWaterContent();
+    this.updateWaterLevelMM();
     this.updateOilLevel();
     
     // Обновление визуализации

@@ -22,13 +22,11 @@ class SeparatorView {
       pressureOut: document.getElementById('pressureOut'),
       
       // Контролы регулятора воды
-      waterCv: document.getElementById('waterCv'),
-      waterDp: document.getElementById('waterDp'),
-      waterU: document.getElementById('waterU'),
-      waterCvVal: document.getElementById('waterCvVal'),
-      waterDpVal: document.getElementById('waterDpVal'),
-      waterUVal: document.getElementById('waterUVal'),
+      waterK: document.getElementById('waterK'),
       waterQ: document.getElementById('waterQ'),
+      waterKVal: document.getElementById('waterKVal'),
+      waterQVal: document.getElementById('waterQVal'),
+      waterLevel: document.getElementById('waterLevel'),
       
       // Контролы регулятора нефти
       oilCv: document.getElementById('oilCv'),
@@ -103,10 +101,20 @@ class SeparatorView {
   }
   
   /**
-   * Обновление обводнённости
+   * Обновление уровня воды (в миллиметрах)
    */
-  updateWaterContent(content) {
-    this.elements.waterQ.textContent = this.format(content, 1) + " %";
+  updateWaterLevelMM(levelMM) {
+    const formatted = this.format(levelMM, 0);
+    this.elements.waterLevel.textContent = formatted + " мм";
+    
+    // Изменение цвета в зависимости от критичности
+    if (levelMM > 2880 || levelMM < 320) {
+      this.elements.waterLevel.style.color = '#ff4d4f';
+    } else if (levelMM > 2500 || levelMM < 500) {
+      this.elements.waterLevel.style.color = '#ffa940';
+    } else {
+      this.elements.waterLevel.style.color = '#4fa3ff';
+    }
   }
   
   /**

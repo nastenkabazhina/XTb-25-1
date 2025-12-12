@@ -112,8 +112,35 @@ h1, h2, h3 {
   align-items: center;
 }
 
+.value-box.large {
+  flex-direction: column;
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.value-box.large .label {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.value-box.large .large-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4fa3ff;
+}
+
 .value-box .label {
   color: #8fa5c2;
+}
+
+.control small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6b8099;
+  font-style: italic;
 }
 
 /* Main Area - Separator Visualization */
