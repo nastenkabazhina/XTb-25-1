@@ -60,10 +60,20 @@ class SeparatorModel {
   
   /**
    * Расчёт давления
-   * P = Kvs * Q²
+   * P (в МПа) = 20.0 - 19.9 * sqrt( (K - 0.1) / (0.9 * (1 + Q/8000)) )
+   * где K - степень открытия клапана воды (waterK), Q - расход эмульсии (inletFlow, м³/сут)
    */
   calculatePressure() {
-    return this.state.kvs * Math.pow(this.state.flow, 2);
+    // Формула: давление в МПа = 20,0 - 19,9 * sqrt((K - 0,1) / (0,9 * (1 + 5000 / 8000)))
+    const K = Number(this.state.waterK);
+    const numerator = K - 0.1;
+    const denominator = 0.9 * (1 + 5000 / 8000);
+    const ratio = denominator > 0 ? numerator / denominator : 0;
+    const safeRatio = Math.max(0, ratio);
+    const sqrtPart = Math.sqrt(safeRatio);
+    const pressureMPa = 20.0 - 19.9 * sqrtPart;
+    // Ограничим диапазон давления 0..20 МПа
+    return Math.max(0, Math.min(20.0, pressureMPa));
   }
   
   /**
@@ -89,6 +99,17 @@ class SeparatorModel {
     const level = minHeight + workingRange * cubeRoot;
     
     return level;
+  }
+
+  /**
+   * Расчёт высоты нефти в мм — линейная аппроксимация по проценту уровня
+   */
+  calculateOilLevelMM() {
+    const percent = this.state.oilLevel;
+    const minHeight = 320;
+    const workingRange = 2560;
+    // Простейшее линейное соответствие: 0% -> minHeight, 100% -> minHeight + workingRange
+    return minHeight + workingRange * (percent / 100);
   }
   
   /**
@@ -155,7 +176,7 @@ class SeparatorModel {
         status: 'warning',
         title: 'Низкое давление, низкие уровни воды и нефти',
         steps: [
-          'Приоткрыть клапан на газовой линии для снижения отбора газа и повышения давления в аппарате до диапазона 6-16 мПа.',
+          'Приоткрыть клапан на газовой линии для снижения отбора газа и повышения давления в аппарате до диапазона 6-16 МПа.',
           'Проверить герметичность системы, входное давление и работу предохранительных клапанов.',
           'Поднять уровень воды (W) до 30-70%, плавно прикрыв дренажный клапан воды.'
         ]
@@ -191,7 +212,7 @@ class SeparatorModel {
         status: 'warning',
         title: 'Низкое давление (уровни в норме)',
         steps: [
-          'Сфокусироваться на нормализации давления. Плавно приоткрыть клапан на газовой линии до выхода в диапазон 6-16 мПа.',
+          'Сфокусироваться на нормализации давления. Плавно приоткрыть клапан на газовой линии до выхода в диапазон 6-16 МПа.',
           'Параметры W (30-70%) и H (40-55%) находятся в целевом диапазоне. Контролировать их, пока давление не выйдет на режим. Регулировку дренажного клапана воды и клапана откачки нефти не производить.'
         ]
       },
@@ -405,17 +426,18 @@ class SeparatorModel {
   checkAlerts() {
     const alerts = [];
     
-    // Проверка давления
+    // Проверка давления (pressure возвращается в МПа)
     const pressure = this.calculatePressure();
-    if (pressure > 10000) {
+    // Пороговые значения: 1 МПа (1000 кПа), 10 МПа (10000 кПа)
+    if (pressure > 10) {
       alerts.push({
         type: 'critical',
-        message: 'АВАРИЯ: Давление превышает 10.000 кПа! Уменьшите напор насоса.'
+        message: 'АВАРИЯ: Давление превышает 10 МПа! Уменьшите напор насоса.'
       });
-    } else if (pressure < 1000) {
+    } else if (pressure < 1) {
       alerts.push({
         type: 'critical',
-        message: 'АВАРИЯ: Давление ниже 1000 кПа! Увеличьте напор насоса.'
+        message: 'АВАРИЯ: Давление ниже 1 МПа! Увеличьте напор насоса.'
       });
     }
     

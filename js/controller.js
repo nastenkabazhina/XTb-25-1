@@ -140,6 +140,7 @@ class SeparatorController {
   updatePressure() {
     const pressure = this.model.calculatePressure();
     this.view.updatePressure(pressure);
+    this.view.updateControlValue('pressureMPa', pressure.toFixed(2));
     this.checkAlerts();
   }
   
@@ -174,7 +175,10 @@ class SeparatorController {
    */
   updateLevels() {
     const { waterLevel, oilLevel, gasLevel } = this.model.state;
-    this.view.updateSeparatorLevels(waterLevel, oilLevel, gasLevel);
+    // Получаем миллиметры уровней
+    const waterLevelMM = this.model.calculateWaterLevelMM();
+    const oilLevelMM = this.model.calculateOilLevelMM();
+    this.view.updateSeparatorLevels(waterLevel, oilLevel, gasLevel, waterLevelMM, oilLevelMM);
   }
   
   /**

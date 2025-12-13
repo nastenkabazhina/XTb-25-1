@@ -1,3 +1,4 @@
+          
 <!doctype html>
 <html lang="ru">
 <head>
@@ -14,7 +15,7 @@
       <div class="tabs">
         <button class="tab-btn active" data-tab="pressure">Клапан регулятора давления</button>
         <button class="tab-btn" data-tab="water">Клапан регулятора уровня воды в основной камере</button>
-        <button class="tab-btn" data-tab="oil">Клапан регулятора уровня нефти в основной камере</button>
+        <button class="tab-btn" data-tab="oil">Клапан регулятора уровня очищенной нефти в основной камере</button>
       </div>
       
       <!-- Вкладка: Регулятор давления -->
@@ -24,12 +25,7 @@
           <input type="range" id="kvs" min="0" max="1" step="0.01" value="0.5">
         </div>
         <div class="control">
-          <label>Шкала расхода жидкости Q (м³/сут): <span id="flowVal">100</span></label>
-          <input type="range" id="flow" min="100" max="8000" step="10" value="100">
-        </div>
-        <div class="value-box">
-          <span class="label">Давление:</span>
-          <span id="pressureOut">0</span>
+          <small>Давление в сепараторе в МПа равно 20,0 минус 19,9, умноженное на квадратный корень из отношения разности шкалы открытия клапана и 0,1 к произведению 0,9 и суммы единицы с отношением 5000 к 8000. Шкала открытия клапана изменяется ползунком ниже.</small>
         </div>
       </div>
       
@@ -44,10 +40,10 @@
           <label>Расход жидкости Q (м³/сут): <span id="waterQVal">100</span></label>
           <input type="range" id="waterQ" min="100" max="1000" step="10" value="100">
         </div>
-        <div class="value-box large">
-          <span class="label">Уровень воды:</span>
-          <span id="waterLevel" class="large-value">0 мм</span>
+        <div class="control">
+          <small>Давление в сепараторе (MPa) рассчитывается по формуле: P = 20.0 − 19.9 × sqrt((K − 0.1) / (0.9 × (1 + Q/8000))).</small>
         </div>
+        <!-- Большой индикатор уровня воды перемещён в правую панель -->
       </div>
       
       <!-- Вкладка: Регулятор нефти -->
@@ -64,10 +60,7 @@
           <label>Степень открытия клапана (u): <span id="oilUVal">0.5</span></label>
           <input type="range" id="oilU" min="0" max="1" step="0.01" value="0.5">
         </div>
-        <div class="value-box">
-          <span class="label">Уровень нефти Q (%):</span>
-          <span id="oilQ">0</span>
-        </div>
+        <!-- Индикатор уровня нефти перемещён в правую панель -->
       </div>
     </aside>
 
@@ -88,8 +81,7 @@
           <div class="phase-layer oil-after-baffle" id="oilLayerAfterBaffle" style="height:0%;"></div>
         </div>
 
-        <!-- Насос -->
-        <div class="pump" id="pump">+</div>
+        <!-- Синий кружочек с надписью Насос удален -->
 
         <!-- Трубопроводы (SVG для цельных линий) -->
         <svg class="pipes-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
@@ -111,6 +103,18 @@
               <stop offset="0%" style="stop-color:#d0d8e2;stop-opacity:1" />
               <stop offset="100%" style="stop-color:#b9c2cf;stop-opacity:1" />
             </linearGradient>
+              <!-- Эмульсионная труба (смешение нефти/воды) -->
+              <linearGradient id="pipeEmulsionGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#0b76ff;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#1f1f1f;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#c0a000;stop-opacity:1" />
+              </linearGradient>
+              <pattern id="flowEmulsion" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+                <rect width="10" height="14" fill="#0b76ff"/>
+                <rect x="10" width="10" height="14" fill="#1f1f1f"/>
+                <rect x="20" width="10" height="14" fill="#c0a000"/>
+                <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+              </pattern>
             
             <!-- Анимация потока -->
             <pattern id="flowBlue" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
@@ -135,25 +139,42 @@
             <path d="M 10 336 L 160 336" stroke="url(#pipeInletGrad)" stroke-width="14" fill="none" stroke-linecap="round"/>
             <path class="flow-line" d="M 10 336 L 160 336" stroke="url(#flowBlue)" stroke-width="14" fill="none" stroke-linecap="round" opacity="0"/>
           </g>
+              <!-- Эмульсионная входная труба слева -->
+              <g id="emulsionPipeSvg">
+            <!-- Основной корпус трубы эмульсии -->
+            <path d="M 10 336 L 200 336"
+              stroke="url(#pipeEmulsionGrad)" stroke-width="18" fill="none" stroke-linecap="round"/>
+            <path class="flow-line emulsion-flow" d="M 10 336 L 200 336"
+              stroke="url(#flowEmulsion)" stroke-width="18" fill="none" stroke-linecap="round" opacity="0"/>
+
+            <!-- Ветвь к водяной линии -->
+            <path d="M 160 336 L 160 456" stroke="url(#pipeBlueGrad)" stroke-width="12" fill="none" stroke-linecap="round"/>
+            <path class="flow-line emulsion-water-flow" d="M 160 336 L 160 456" stroke="url(#flowBlue)" stroke-width="12" fill="none" stroke-linecap="round" opacity="0"/>
+
+            <!-- Ветвь к нефтяной линии -->
+            <!-- Убрана чёрная ветка эмульсии (скрыта) -->
+            <path d="M 200 336 L 420 336 L 420 456 L 740 456" stroke="transparent" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display:none;"/>
+            <path class="flow-line emulsion-oil-flow" d="M 200 336 L 420 336 L 420 456 L 740 456" stroke="transparent" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0" style="display:none;"/>
+              </g>
           
-          <!-- Водяная линия (цельная L-образная труба) -->
+              <!-- Водяная линия (цельная L-образная труба) -->
           <g id="waterPipeSvg">
-            <path d="M 200 516 L 460 516 L 460 456 L 620 456" 
+            <path d="M 200 516 L 460 516 L 460 456 L 420 456" 
                   stroke="url(#pipeBlueGrad)" stroke-width="14" fill="none" 
                   stroke-linecap="round" stroke-linejoin="round"/>
             <path class="flow-line water-flow" 
-                  d="M 200 516 L 460 516 L 460 456 L 620 456" 
+              d="M 200 516 L 460 516 L 460 456 L 420 456" 
                   stroke="url(#flowBlue)" stroke-width="14" fill="none" 
                   stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
           </g>
           
-          <!-- Нефтяная линия (цельная L-образная труба) -->
+              <!-- Нефтяная линия (цельная L-образная труба) -->
           <g id="oilPipeSvg">
-            <path d="M 780 504 L 700 504 L 700 456 L 540 456" 
+            <path d="M 780 504 L 700 504 L 700 456 L 740 456" 
                   stroke="url(#pipeBlackGrad)" stroke-width="14" fill="none" 
                   stroke-linecap="round" stroke-linejoin="round"/>
             <path class="flow-line oil-flow" 
-                  d="M 780 504 L 700 504 L 700 456 L 540 456" 
+              d="M 780 504 L 700 504 L 700 456 L 740 456" 
                   stroke="url(#flowBlack)" stroke-width="14" fill="none" 
                   stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
           </g>
@@ -171,7 +192,7 @@
         </svg>
         
         <!-- Входная труба (для совместимости с существующим кодом) -->
-        <div class="pipe" id="inletPipe" style="left: 1%; top: 56%; width: 15%; height: 14px; opacity: 0;">
+        <div class="pipe pipe-emulsion" id="inletPipe" style="left: 1%; top: 56%; width: 15%; height: 14px; opacity: 1;">
           <div class="flow"></div>
         </div>
         
@@ -179,21 +200,21 @@
         <div class="pipe pipe-blue" id="waterPipe" style="left: 20%; bottom: 14%; width: 26%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe vertical pipe-blue" style="left: 46%; bottom: 14%; height: 90px; opacity: 0;">
+        <div class="pipe vertical pipe-blue" style="left: 42%; bottom: 14%; height: 90px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe pipe-blue" id="waterPipe2" style="left: 46%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
+        <div class="pipe pipe-blue" id="waterPipe2" style="left: 42%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
         
         <!-- Нефтяная линия (скрытые div'ы для совместимости) -->
-        <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 16%; width: 22%; height: 14px; opacity: 0;">
+        <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 14%; width: 22%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe vertical pipe-black" style="right: 30%; bottom: 16%; height: 90px; opacity: 0;">
+        <div class="pipe vertical pipe-black" style="right: 26%; bottom: 14%; height: 90px; opacity: 0;">
           <div class="flow"></div>
         </div>
-        <div class="pipe pipe-black" id="oilPipe2" style="right: 30%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
+        <div class="pipe pipe-black" id="oilPipe2" style="right: 26%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
           <div class="flow"></div>
         </div>
         
@@ -209,11 +230,11 @@
         </div>
 
         <!-- Клапаны -->
-        <div class="valve open" id="waterValve" style="left: 40%; bottom: 14%;">H2O</div>
+        <div class="valve open" id="waterValve" style="left: 42%; bottom: 8%; z-index: 3;">H2O</div>
 
-        <div class="valve open" id="oilValve" style="right: 22%; bottom: 16%;">Oil</div>
+        <div class="valve open" id="oilValve" style="right: 26%; bottom: 8%; z-index: 3;">Oil</div>
 
-        <div class="valve open" id="gasValve" style="right: 22%; top: 16%;">Gas</div>
+        <div class="valve open" id="gasValve" style="right: 30%; top: 22%; z-index: 12;">Gas</div>
       </div>
       
       <!-- Алерт -->
@@ -229,13 +250,19 @@
         <p>Пожалуйста, подождите.</p>
       </div>
       
-      <!-- Показатели -->
+      <!-- Показатели перенесены в левый нижний угол -->
+    </aside>
+
+    <!-- Левая нижняя панель: Показатели -->
+    <aside class="left-bottom-readouts">
       <div class="readouts">
-        <div class="pill">Газ: <span id="gasLevelText">40%</span></div>
-        <div class="pill">Нефть: <span id="oilLevelText">30%</span></div>
-        <div class="pill">Вода: <span id="waterLevelText">30%</span></div>
+        <div class="pill">Давление: <span id="pressureMPa">0.000 МПа</span></div>
         <div class="pill">Расход на входе: <span id="inletFlowText">200 м³/сут</span></div>
+        <div class="pill">Вода: <span id="waterLevelText">0 мм</span></div>
+        <div class="pill">Нефть: <span id="oilLevelText">0 мм</span></div>
+        <div class="pill">Газ: <span id="gasLevelText">40%</span></div>
       </div>
+    </aside>
       
     </aside>
   </div>

@@ -60,6 +60,10 @@ class SeparatorView {
       oilPipe2: document.getElementById('oilPipe2'),
       gasPipe: document.getElementById('gasPipe'),
       gasPipe2: document.getElementById('gasPipe2'),
+      // Эмульсионная входная труба (SVG потоки)
+      emulsionFlows: document.querySelectorAll('.emulsion-flow'),
+      emulsionWaterFlows: document.querySelectorAll('.emulsion-water-flow'),
+      emulsionOilFlows: document.querySelectorAll('.emulsion-oil-flow'),
       
       // Насос
       pump: document.getElementById('pump'),
@@ -67,6 +71,9 @@ class SeparatorView {
       // Алерты и рекомендации
       alert: document.getElementById('alertBox'),
       recommendationContent: document.getElementById('recommendationContent')
+      ,
+      // Индикатор давления в МПа
+      pressureMPa: document.getElementById('pressureMPa')
     };
   }
   
@@ -95,8 +102,16 @@ class SeparatorView {
    * Обновление давления
    */
   updatePressure(pressure) {
-    const formatted = this.format(pressure, 0);
-    this.elements.pressureOut.textContent = formatted + " кПа";
+    // `pressure` приходит в МПа (МегаПаскали)
+    // kPa = MPa * 1000, Pa = MPa * 1_000_000
+    const kPa = Number(pressure) * 1000;
+    const formattedKpa = this.format(kPa, 0);
+    if (this.elements.pressureOut) {
+      this.elements.pressureOut.textContent = formattedKpa + " кПа";
+    }
+    if (this.elements.pressureMPa) {
+      this.elements.pressureMPa.textContent = this.format(pressure, 3) + " МПа";
+    }
   }
   
   /**
@@ -104,15 +119,19 @@ class SeparatorView {
    */
   updateWaterLevelMM(levelMM) {
     const formatted = this.format(levelMM, 0);
-    this.elements.waterLevel.textContent = formatted + " мм";
+    if (this.elements.waterLevel) {
+      this.elements.waterLevel.textContent = formatted + " мм";
+    }
     
     // Изменение цвета в зависимости от критичности
-    if (levelMM > 2880 || levelMM < 320) {
-      this.elements.waterLevel.style.color = '#ff4d4f';
-    } else if (levelMM > 2500 || levelMM < 500) {
-      this.elements.waterLevel.style.color = '#ffa940';
-    } else {
-      this.elements.waterLevel.style.color = '#4fa3ff';
+    if (this.elements.waterLevel) {
+      if (levelMM > 2880 || levelMM < 320) {
+        this.elements.waterLevel.style.color = '#ff4d4f';
+      } else if (levelMM > 2500 || levelMM < 500) {
+        this.elements.waterLevel.style.color = '#ffa940';
+      } else {
+        this.elements.waterLevel.style.color = '#4fa3ff';
+      }
     }
   }
   
@@ -120,13 +139,15 @@ class SeparatorView {
    * Обновление уровня нефти
    */
   updateOilLevel(level) {
-    this.elements.oilQ.textContent = this.format(level, 2) + " %";
+    if (this.elements.oilQ) {
+      this.elements.oilQ.textContent = this.format(level, 2) + " %";
+    }
   }
   
   /**
    * Обновление визуализации уровней в сепараторе
    */
-  updateSeparatorLevels(waterLevel, oilLevel, gasLevel) {
+  updateSeparatorLevels(waterLevel, oilLevel, gasLevel, waterLevelMM, oilLevelMM) {
     // Нормализация чтобы сумма не превышала 100%
     const total = waterLevel + oilLevel + gasLevel;
     if (total > 100) {
@@ -172,8 +193,17 @@ class SeparatorView {
     // Газовый слой остается без изменений
     this.elements.gasLayer.style.height = gasLevel + "%";
     
-    this.elements.waterLevelText.textContent = this.format(waterLevel, 1) + "%";
-    this.elements.oilLevelText.textContent = this.format(oilLevel, 1) + "%";
+    // Отображение в правой панели: если переданы mm-значения, показываем мм, иначе - проценты
+    if (typeof waterLevelMM === 'number') {
+      this.elements.waterLevelText.textContent = this.format(waterLevelMM, 0) + " мм";
+    } else {
+      this.elements.waterLevelText.textContent = this.format(waterLevel, 1) + "%";
+    }
+    if (typeof oilLevelMM === 'number') {
+      this.elements.oilLevelText.textContent = this.format(oilLevelMM, 0) + " мм";
+    } else {
+      this.elements.oilLevelText.textContent = this.format(oilLevel, 1) + "%";
+    }
     this.elements.gasLevelText.textContent = this.format(gasLevel, 1) + "%";
   }
   
@@ -204,6 +234,14 @@ class SeparatorView {
     [this.elements.gasPipe, this.elements.gasPipe2].forEach(p => 
       p.classList.toggle('active', gasOpen)
     );
+
+    // Управление потоками эмульсии: ветви для воды и нефти
+    if (this.elements.emulsionWaterFlows) {
+      this.elements.emulsionWaterFlows.forEach(f => f.classList.toggle('active', waterOpen));
+    }
+    if (this.elements.emulsionOilFlows) {
+      this.elements.emulsionOilFlows.forEach(f => f.classList.toggle('active', oilOpen));
+    }
   }
   
   /**
@@ -211,6 +249,17 @@ class SeparatorView {
    */
   updateInletFlow(flow) {
     this.elements.inletFlowText.textContent = flow + " м³/сут";
+
+    // Показать активность эмульсионной трубы, если есть подача
+    const hasFlow = Number(flow) > 0;
+    this.elements.emulsionFlows.forEach(f => f.classList.toggle('active', hasFlow));
+
+    // Включаем анимацию старой div-трубы для совместимости
+    if (hasFlow) {
+      this.elements.inletPipe.classList.add('active');
+    } else {
+      this.elements.inletPipe.classList.remove('active');
+    }
   }
   
   /**

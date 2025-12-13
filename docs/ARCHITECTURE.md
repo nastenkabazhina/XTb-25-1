@@ -165,7 +165,7 @@
 │  │                                                           │
 │  ├── Расчётные функции                                       │
 │  │   ├── calculatePressure()                                 │
-│  │   │   └── P = Kvs × Q²                                    │
+│  │   │   └── P = 20.0 - 19.9 × sqrt((K - 0.1) / (0.9 × (1 + Q/8000)))    │
 │  │   ├── calculateWaterContent()                             │
 │  │   │   └── Q = Cv × u × √ΔP                                │
 │  │   └── calculateOilLevel()                                 │

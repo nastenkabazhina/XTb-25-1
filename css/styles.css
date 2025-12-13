@@ -1,17 +1,40 @@
+/* Левая нижняя панель показателей */
+.left-bottom-readouts {
+  position: fixed;
+  left: 10px;
+  bottom: 30px; /* поднято выше на 30px от нижнего края */
+  background: var(--panel-2);
+  border-radius: 6px;
+  padding: 10px 15px;
+  box-shadow: 0 0 8px rgba(30, 111, 255, 0.15);
+  z-index: 1000;
+  font-size: 14px;
+  color: var(--accent);
+  max-width: 280px;
+}
+/* Стили для отдельных цветных «таблеток» */
+.left-bottom-readouts .pill {
+  background-color: var(--panel);
+  color: var(--oil);
+  border-radius: 12px;
+  padding: 5px 14px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
 /* Цветовая палитра */
 :root {
-  --bg: #111820;
-  --panel: #1b2634;
-  --panel-2: #0f1823;
-  --accent: #4fa3ff;
-  --oil: #111;
-  --water: #1f6bff;
-  --gas: #d6d6d6;
-  --danger: #ff4d4f;
-  --ok: #4caf50;
-  --pipe-blue: #0540c8;
-  --pipe-black: #111;
-  --pipe-yellow: #d6b600;
+  --bg: #f5f9ff;        /* светлый фон страницы */
+  --panel: #ffffff;     /* белые панели */
+  --panel-2: #eaf3ff;   /* светло-голубой для внутренних панелей */
+  --accent: #1e6fff;    /* ярко-синий акцент */
+  --oil: #1f1f1f;       /* тёмная нефть для контраста */
+  --water: #0b76ff;     /* насыщенный синий для воды */
+  --gas: #8fa6c9;       /* серо-голубой для газа */
+  --danger: #d93636;    /* аварийный красный (не меняем сильно) */
+  --ok: #1e9a4b;        /* зелёный для OK */
+  --pipe-blue: #2b89ff; /* синие трубы */
+  --pipe-black: #333333;/* нейтральный тёмно-серый */
+  --pipe-yellow: #f2b400;/* жёлтый для газа/нефти */
 }
 
 * {
@@ -22,7 +45,7 @@ body {
   margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
   background: var(--bg);
-  color: #e9eef5;
+  color: #0d2942; /* тёмно-синий текст */
   overflow-x: hidden;
 }
 
@@ -41,7 +64,7 @@ h1, h2, h3 {
 .sidebar {
   background: var(--panel);
   padding: 18px;
-  border-right: 1px solid #243244;
+  border-right: 1px solid rgba(30,111,255,0.06);
 }
 
 .sidebar h2 {
@@ -57,9 +80,9 @@ h1, h2, h3 {
 }
 
 .tab-btn {
-  border: 1px solid #2f4054;
-  background: #152033;
-  color: #dce5f1;
+  border: 1px solid rgba(30,111,255,0.12);
+  background: #f3f8ff;
+  color: #0d2942;
   border-radius: 10px;
   padding: 12px 14px;
   text-align: left;
@@ -68,16 +91,17 @@ h1, h2, h3 {
 }
 
 .tab-btn.active {
-  background: #235dac;
-  border-color: #3f7bd8;
-  box-shadow: 0 0 12px rgba(79, 163, 255, 0.35);
+  background: var(--accent);
+  border-color: rgba(30,111,255,0.3);
+  box-shadow: 0 0 24px rgba(30,111,255,0.18);
+  color: #fff;
 }
 
 .tab-content {
   margin-top: 14px;
   padding: 14px;
   background: var(--panel-2);
-  border: 1px solid #1f2c3c;
+  border: 1px solid rgba(30,111,255,0.08);
   border-radius: 12px;
   display: none;
   gap: 12px;
@@ -94,7 +118,7 @@ h1, h2, h3 {
 
 .control label {
   font-size: 13px;
-  color: #cdd7e6;
+  color: #164a6e;
 }
 
 .control input[type="range"] {
@@ -102,8 +126,8 @@ h1, h2, h3 {
 }
 
 .value-box {
-  background: #0c131d;
-  border: 1px solid #1d2b3a;
+  background: #ffffff;
+  border: 1px solid rgba(30,111,255,0.06);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 13px;
@@ -139,7 +163,7 @@ h1, h2, h3 {
   display: block;
   margin-top: 4px;
   font-size: 11px;
-  color: #6b8099;
+  color: #526b8b;
   font-style: italic;
 }
 
@@ -159,8 +183,8 @@ h1, h2, h3 {
 
 .sim-area {
   position: relative;
-  background: radial-gradient(circle at 20% 20%, #1a2736, #0c1119 55%);
-  border: 1px solid #1f2c3c;
+  background: radial-gradient(circle at 20% 20%, #f8fbff, #e9f2ff 55%);
+  border: 1px solid rgba(30,111,255,0.06);
   border-radius: 12px;
   min-height: 540px;
   overflow: hidden;
@@ -173,10 +197,10 @@ h1, h2, h3 {
   transform: translate(-50%, -50%);
   width: 72%;
   height: 260px;
-  background: linear-gradient(180deg, #7f858e 0%, #6c737c 100%);
+  background: linear-gradient(180deg, #e9ecef 0%, #d0d4d8 100%);
   border-radius: 30px;
-  border: 3px solid #50545d;
-  box-shadow: inset 0 0 0 10px #888e98, 0 25px 35px rgba(0,0,0,0.35);
+  border: 3px solid #bdbdbd;
+  box-shadow: inset 0 0 0 4px rgba(0,0,0,0.03), 0 18px 28px rgba(14,38,70,0.04);
   overflow: hidden;
 }
 
@@ -184,7 +208,7 @@ h1, h2, h3 {
   content: "";
   position: absolute;
   inset: 18px;
-  border: 2px dashed rgba(255,255,255,0.18);
+  border: 2px dashed rgba(0,0,0,0.08);
   border-radius: 22px;
   pointer-events: none;
 }
@@ -200,7 +224,7 @@ h1, h2, h3 {
 
 .water {
   bottom: 10px;
-  background: linear-gradient(180deg, #2f8cff 0%, #0d57c7 100%);
+  background: linear-gradient(180deg, #a7d1ff 0%, #0b76ff 100%);
   box-shadow: inset 0 0 18px rgba(0,0,0,0.35);
   /* Ограничение слоя воды до перегородки */
   right: calc(33.33% + 10px);
@@ -208,8 +232,8 @@ h1, h2, h3 {
 
 .oil {
   bottom: 10px;
-  background: linear-gradient(180deg, #141414 0%, #050505 70%);
-  box-shadow: inset 0 0 22px rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, #0a0a0a 0%, #000000 70%);
+  box-shadow: inset 0 0 18px rgba(255,255,255,0.02);
   /* Ограничение слоя нефти до перегородки */
   right: calc(33.33% + 10px);
 }
@@ -221,11 +245,8 @@ h1, h2, h3 {
   bottom: 10px;
   width: 4px;
   height: 50%; /* Высота до середины сепаратора */
-  background: linear-gradient(180deg, #50545d 0%, #6c737c 50%, #50545d 100%);
-  box-shadow: 
-    inset 0 0 3px rgba(0,0,0,0.5),
-    2px 0 8px rgba(0,0,0,0.4),
-    -2px 0 8px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, #bdbdbd 0%, #9f9f9f 100%);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
   z-index: 10;
   border-radius: 2px 2px 0 0;
 }
@@ -237,8 +258,8 @@ h1, h2, h3 {
   right: 10px;
   bottom: 10px;
   transition: height 0.6s ease;
-  background: linear-gradient(180deg, #141414 0%, #050505 70%);
-  box-shadow: inset 0 0 22px rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, #0a0a0a 0%, #000000 70%);
+  box-shadow: inset 0 0 12px rgba(255,255,255,0.02);
   border-radius: 6px;
 }
 
@@ -345,6 +366,14 @@ h1, h2, h3 {
   background-image: linear-gradient(90deg, rgba(255,255,255,0.2) 0 50%, transparent 50% 100%);
 }
 
+/* Эмульсионная труба (смешанная по цвету) */
+.pipe-emulsion {
+  background: linear-gradient(90deg, #0b76ff 0%, #1f1f1f 50%, #c0a000 100%);
+}
+.pipe-emulsion .flow {
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.12) 0 8px, transparent 8px 16px);
+}
+
 /* Valves */
 .valve {
   position: absolute;
@@ -364,15 +393,17 @@ h1, h2, h3 {
 }
 
 .valve.open {
-  background: #9ee1a1;
-  border-color: #5abf60;
+  background: #34c759;
+  border-color: #2e7d32;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(52,199,89,0.15);
 }
 
 .valve-label {
   position: absolute;
   top: 36px;
   font-size: 12px;
-  color: #cdd7e6;
+  color: #164a6e;
   width: 120px;
   text-align: center;
 }
@@ -383,8 +414,8 @@ h1, h2, h3 {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #7aa3ff, #1f3f8c 70%);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+  background: radial-gradient(circle at 30% 30%, #a7d1ff, #1e6fff 70%);
+  box-shadow: 0 10px 20px rgba(14,38,70,0.08);
   left: 6%;
   top: 58%;
   display: grid;
@@ -392,7 +423,7 @@ h1, h2, h3 {
   cursor: pointer;
   color: #fff;
   font-weight: 600;
-  border: 3px solid #9fb9ff;
+  border: 3px solid rgba(30,111,255,0.18);
   transition: transform 0.2s ease;
 }
 
@@ -405,7 +436,7 @@ h1, h2, h3 {
   position: absolute;
   bottom: -22px;
   font-size: 12px;
-  color: #cdd7e6;
+  color: #164a6e;
 }
 
 /* Readouts */
@@ -418,8 +449,8 @@ h1, h2, h3 {
 }
 
 .pill {
-  background: #122030;
-  border: 1px solid #203143;
+  background: #f3f8ff;
+  border: 1px solid rgba(30,111,255,0.08);
   padding: 8px 10px;
   border-radius: 10px;
   font-size: 12px;
@@ -449,6 +480,8 @@ h1, h2, h3 {
   animation: blink 1s infinite;
 }
 
+
+
 @keyframes blink {
   0%, 50% {
     opacity: 1;
@@ -462,7 +495,7 @@ h1, h2, h3 {
 .recommendations {
   background: var(--panel);
   padding: 18px;
-  border-left: 1px solid #243244;
+  border-left: 1px solid rgba(30,111,255,0.06);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -476,7 +509,7 @@ h1, h2, h3 {
 
 .recommendation-content {
   background: var(--panel-2);
-  border: 1px solid #1f2c3c;
+  border: 1px solid rgba(30,111,255,0.06);
   border-radius: 12px;
   padding: 16px;
   font-size: 13px;
@@ -544,8 +577,8 @@ h1, h2, h3 {
   padding: 6px 10px;
   border-radius: 12px;
   font-size: 12px;
-  background: #132236;
-  border: 1px solid #203143;
+  background: #f3f8ff;
+  border: 1px solid rgba(30,111,255,0.06);
 }
 
 .grid-2 {
