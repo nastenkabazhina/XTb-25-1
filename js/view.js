@@ -14,28 +14,20 @@ class SeparatorView {
    */
   getElements() {
     return {
-      // Контролы регулятора давления
-      kvs: document.getElementById('kvs'),
-      flow: document.getElementById('flow'),
-      kvsVal: document.getElementById('kvsVal'),
-      flowVal: document.getElementById('flowVal'),
-      pressureOut: document.getElementById('pressureOut'),
+      // Контролы клапана газа (регулятор давления)
+      gas: document.getElementById('gas'),
+      gasVal: document.getElementById('gasVal'),
+      pressureVal: document.getElementById('pressureVal'),
       
-      // Контролы регулятора воды
-      waterK: document.getElementById('waterK'),
-      waterQ: document.getElementById('waterQ'),
-      waterKVal: document.getElementById('waterKVal'),
-      waterQVal: document.getElementById('waterQVal'),
-      waterLevel: document.getElementById('waterLevel'),
+      // Контролы клапана воды (регулятор уровня воды)
+      waterLevelK: document.getElementById('waterLevelK'),
+      waterLevelKVal: document.getElementById('waterLevelKVal'),
+      waterLevelVal: document.getElementById('waterLevelVal'),
       
-      // Контролы регулятора нефти
-      oilCv: document.getElementById('oilCv'),
-      oilDp: document.getElementById('oilDp'),
-      oilU: document.getElementById('oilU'),
-      oilCvVal: document.getElementById('oilCvVal'),
-      oilDpVal: document.getElementById('oilDpVal'),
-      oilUVal: document.getElementById('oilUVal'),
-      oilQ: document.getElementById('oilQ'),
+      // Контролы клапана нефти (регулятор уровня нефти)
+      oilLevelK: document.getElementById('oilLevelK'),
+      oilLevelKVal: document.getElementById('oilLevelKVal'),
+      oilLevelVal: document.getElementById('oilLevelVal'),
       
       // Визуализация
       waterLayer: document.getElementById('waterLayer'),
@@ -116,32 +108,20 @@ class SeparatorView {
   
   /**
    * Обновление уровня воды (в миллиметрах)
+   * Примечание: отображение уровня воды происходит в updateSeparatorLevels
    */
   updateWaterLevelMM(levelMM) {
-    const formatted = this.format(levelMM, 0);
-    if (this.elements.waterLevel) {
-      this.elements.waterLevel.textContent = formatted + " мм";
-    }
-    
-    // Изменение цвета в зависимости от критичности
-    if (this.elements.waterLevel) {
-      if (levelMM > 2880 || levelMM < 320) {
-        this.elements.waterLevel.style.color = '#ff4d4f';
-      } else if (levelMM > 2500 || levelMM < 500) {
-        this.elements.waterLevel.style.color = '#ffa940';
-      } else {
-        this.elements.waterLevel.style.color = '#4fa3ff';
-      }
-    }
+    // Метод оставлен для совместимости с контроллером
+    // Фактическое отображение происходит в updateSeparatorLevels
   }
   
   /**
    * Обновление уровня нефти
+   * Примечание: отображение уровня нефти происходит в updateSeparatorLevels
    */
   updateOilLevel(level) {
-    if (this.elements.oilQ) {
-      this.elements.oilQ.textContent = this.format(level, 2) + " %";
-    }
+    // Метод оставлен для совместимости с контроллером
+    // Фактическое отображение происходит в updateSeparatorLevels
   }
   
   /**
@@ -286,13 +266,6 @@ class SeparatorView {
   }
   
   /**
-   * Скрытие алерта
-   */
-  hideAlert() {
-    this.elements.alert.style.display = "none";
-  }
-  
-  /**
    * Обновление рекомендаций
    */
   updateRecommendations(recommendation) {
@@ -341,16 +314,6 @@ class SeparatorView {
         document.getElementById(btn.dataset.tab).classList.add('active');
       });
     });
-  }
-  
-  /**
-   * Привязка обработчика к контролу
-   */
-  bindControl(elementId, handler) {
-    const el = this.elements[elementId];
-    if (el) {
-      el.addEventListener('input', (e) => handler(Number(e.target.value)));
-    }
   }
   
   /**
