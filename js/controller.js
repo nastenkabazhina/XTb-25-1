@@ -35,6 +35,54 @@ class SeparatorController {
    * Привязка обработчиков контролов
    */
   bindControls() {
+                    // Клапан регулятора уровня воды в основной камере
+                    const waterLevelSlider = document.getElementById('waterLevelK');
+                    const waterLevelValDisplay = document.getElementById('waterLevelKVal');
+                    const waterLevelOutput = document.getElementById('waterLevelVal');
+                    if (waterLevelSlider && waterLevelValDisplay && waterLevelOutput) {
+                      waterLevelSlider.addEventListener('input', () => {
+                        const k = parseFloat(waterLevelSlider.value);
+                        waterLevelValDisplay.textContent = k.toFixed(2);
+                        // Формула: 1112 минус 792 * кубический корень из ((k - 0.1) / 1.4625)
+                        let waterVal = 1112;
+                        if (k > 0.1) {
+                          waterVal -= 792 * Math.cbrt((k - 0.1) / 1.4625);
+                        }
+                        waterLevelOutput.textContent = waterVal.toFixed(3);
+                      });
+                      waterLevelSlider.dispatchEvent(new Event('input'));
+                    }
+                // Клапан регулятора уровня нефти в основной камере
+                const oilLevelSlider = document.getElementById('oilLevelK');
+                const oilLevelValDisplay = document.getElementById('oilLevelKVal');
+                const oilLevelOutput = document.getElementById('oilLevelVal');
+                if (oilLevelSlider && oilLevelValDisplay && oilLevelOutput) {
+                  oilLevelSlider.addEventListener('input', () => {
+                    const k = parseFloat(oilLevelSlider.value);
+                    oilLevelValDisplay.textContent = k.toFixed(2);
+                    // Формула: 973 минус 473 * кубический корень из ((k - 0.1) / 1.4625)
+                    let oilVal = 973;
+                    if (k > 0.1) {
+                      oilVal -= 473 * Math.cbrt((k - 0.1) / 1.4625);
+                    }
+                    oilLevelOutput.textContent = oilVal.toFixed(3);
+                  });
+                  oilLevelSlider.dispatchEvent(new Event('input'));
+                }
+            // Удаляем обработку ползунка для вкладки нефти, так как вкладка удалена
+            // Можно добавить очистку или отключение событий, если это необходимо
+        // Удаляем обработку ползунка для вкладки воды, так как вкладка удалена
+        // Можно добавить очистку или отключение событий, если это необходимо
+    
+        // Удаляем обработку ползунка для вкладки воды
+        const waterSlider = document.getElementById('waterK');
+        if (waterSlider) {
+          waterSlider.replaceWith(waterSlider.cloneNode(true));
+        }
+        const waterQSlider = document.getElementById('waterQ');
+        if (waterQSlider) {
+          waterQSlider.replaceWith(waterQSlider.cloneNode(true));
+        }
     // Регулятор давления
     this.view.bindControl('kvs', (value) => {
       this.model.updateParameter('kvs', value);

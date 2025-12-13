@@ -13,21 +13,51 @@
     <aside class="sidebar">
       <h2>Управление клапанами</h2>
       <div class="tabs">
-        <button class="tab-btn active" data-tab="pressure">Клапан регулятора давления</button>
-        <button class="tab-btn" data-tab="water">Клапан регулятора уровня воды в основной камере</button>
-        <button class="tab-btn" data-tab="oil">Клапан регулятора уровня очищенной нефти в основной камере</button>
+        <button class="tab-btn" data-tab="pressureVolume">Клапан регулятора объема давления в основной камере</button>
+        <button class="tab-btn" data-tab="waterLevel">Клапан регулятора уровня воды в основной камере</button>
+        <button class="tab-btn" data-tab="oilLevel">Клапан регулятора уровня нефти в основной камере</button>
       </div>
       
-      <!-- Вкладка: Регулятор давления -->
-      <div id="pressure" class="tab-content active">
+      <!-- Вкладка: Клапан регулятора объема давления -->
+      <div id="pressureVolume" class="tab-content">
         <div class="control">
-          <label>Шкала открытия клапана (Kvs): <span id="kvsVal">0.5</span></label>
-          <input type="range" id="kvs" min="0" max="1" step="0.01" value="0.5">
+          <label>Степень открытия клапана (Gas): <span id="gasVal">0.5</span></label>
+          <input type="range" id="gas" min="0" max="1" step="0.01" value="0.5">
+          <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
         </div>
-        <div class="control">
-          <small>Давление в сепараторе в МПа равно 20,0 минус 19,9, умноженное на квадратный корень из отношения разности шкалы открытия клапана и 0,1 к произведению 0,9 и суммы единицы с отношением 5000 к 8000. Шкала открытия клапана изменяется ползунком ниже.</small>
+        <div class="control pressureDisplay">
+          <small>Давление: <span id="pressureVal">2.5</span> МПа</small>
         </div>
       </div>
+      <!-- Вкладка: Регулятор давления -->
+        <!-- Вкладка: Клапан регулятора уровня воды -->
+        <div id="waterLevel" class="tab-content">
+          <div class="control">
+            <label>Степень открытия клапана (К): <span id="waterLevelKVal">0.5</span></label>
+            <input type="range" id="waterLevelK" min="0" max="1" step="0.01" value="0.5">
+            <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
+          </div>
+          <div class="control">
+            <small>Вода: <span id="waterLevelVal">0.0</span></small>
+          </div>
+        </div>
+      
+        <!-- Вкладка: Регулятор нефти -->
+        <div id="oil" class="tab-content">
+          <div class="control">
+            <label>Коэффициент пропускной способности (Cv), м³/ч: <span id="oilCvVal">20</span></label>
+            <input type="range" id="oilCv" min="0" max="56" step="1" value="20">
+          </div>
+          <div class="control">
+            <label>Перепад давления (ΔP), бар: <span id="oilDpVal">4</span></label>
+            <input type="range" id="oilDp" min="0" max="8.5" step="0.1" value="4">
+          </div>
+          <div class="control">
+            <label>Степень открытия клапана (u): <span id="oilUVal">0.5</span></label>
+            <input type="range" id="oilU" min="0" max="1" step="0.01" value="0.5">
+          </div>
+          <!-- Индикатор уровня нефти перемещён в правую панель -->
+        </div>
       
       <!-- Вкладка: Регулятор воды -->
       <div id="water" class="tab-content">
@@ -47,21 +77,17 @@
       </div>
       
       <!-- Вкладка: Регулятор нефти -->
-      <div id="oil" class="tab-content">
-        <div class="control">
-          <label>Коэффициент пропускной способности (Cv), м³/ч: <span id="oilCvVal">20</span></label>
-          <input type="range" id="oilCv" min="0" max="56" step="1" value="20">
+        <!-- Вкладка: Клапан регулятора уровня нефти -->
+        <div id="oilLevel" class="tab-content">
+          <div class="control">
+            <label>Степень открытия клапана (К): <span id="oilLevelKVal">0.5</span></label>
+            <input type="range" id="oilLevelK" min="0" max="1" step="0.01" value="0.5">
+            <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
+          </div>
+          <div class="control">
+            <small>Нефть: <span id="oilLevelVal">0.0</span></small>
+          </div>
         </div>
-        <div class="control">
-          <label>Перепад давления (ΔP), бар: <span id="oilDpVal">4</span></label>
-          <input type="range" id="oilDp" min="0" max="8.5" step="0.1" value="4">
-        </div>
-        <div class="control">
-          <label>Степень открытия клапана (u): <span id="oilUVal">0.5</span></label>
-          <input type="range" id="oilU" min="0" max="1" step="0.01" value="0.5">
-        </div>
-        <!-- Индикатор уровня нефти перемещён в правую панель -->
-      </div>
     </aside>
 
     <!-- Центральная панель: Цифровой двойник -->
