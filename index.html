@@ -133,30 +133,7 @@
               <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
             </pattern>
           </defs>
-          
-          <!-- Входная труба -->
-          <g id="inletPipeSvg">
-            <path d="M 10 336 L 160 336" stroke="url(#pipeInletGrad)" stroke-width="14" fill="none" stroke-linecap="round"/>
-            <path class="flow-line" d="M 10 336 L 160 336" stroke="url(#flowBlue)" stroke-width="14" fill="none" stroke-linecap="round" opacity="0"/>
-          </g>
-              <!-- Эмульсионная входная труба слева -->
-              <g id="emulsionPipeSvg">
-            <!-- Основной корпус трубы эмульсии -->
-            <path d="M 10 336 L 200 336"
-              stroke="url(#pipeEmulsionGrad)" stroke-width="18" fill="none" stroke-linecap="round"/>
-            <path class="flow-line emulsion-flow" d="M 10 336 L 200 336"
-              stroke="url(#flowEmulsion)" stroke-width="18" fill="none" stroke-linecap="round" opacity="0"/>
 
-            <!-- Ветвь к водяной линии -->
-            <path d="M 160 336 L 160 456" stroke="url(#pipeBlueGrad)" stroke-width="12" fill="none" stroke-linecap="round"/>
-            <path class="flow-line emulsion-water-flow" d="M 160 336 L 160 456" stroke="url(#flowBlue)" stroke-width="12" fill="none" stroke-linecap="round" opacity="0"/>
-
-            <!-- Ветвь к нефтяной линии -->
-            <!-- Убрана чёрная ветка эмульсии (скрыта) -->
-            <path d="M 200 336 L 420 336 L 420 456 L 740 456" stroke="transparent" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display:none;"/>
-            <path class="flow-line emulsion-oil-flow" d="M 200 336 L 420 336 L 420 456 L 740 456" stroke="transparent" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0" style="display:none;"/>
-              </g>
-          
               <!-- Водяная линия (цельная L-образная труба) -->
           <g id="waterPipeSvg">
             <path d="M 200 516 L 460 516 L 460 456 L 420 456" 
@@ -262,9 +239,7 @@
         <div class="pill">Нефть: <span id="oilLevelText">0 мм</span></div>
         <div class="pill">Газ: <span id="gasLevelText">40%</span></div>
       </div>
-    </aside>
-      
-    </aside>
+  </aside>
   </div>
 
   <!-- Подключение модулей -->
