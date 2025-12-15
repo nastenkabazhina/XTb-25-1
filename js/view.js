@@ -96,13 +96,9 @@ class SeparatorView {
   updatePressure(pressure) {
     // `pressure` приходит в МПа (МегаПаскали)
     // kPa = MPa * 1000, Pa = MPa * 1_000_000
-    const kPa = Number(pressure) * 1000;
-    const formattedKpa = this.format(kPa, 0);
-    if (this.elements.pressureOut) {
-      this.elements.pressureOut.textContent = formattedKpa + " кПа";
-    }
+    const textValue = this.format(pressure, 3) + " МПа";
     if (this.elements.pressureMPa) {
-      this.elements.pressureMPa.textContent = this.format(pressure, 3) + " МПа";
+      this.elements.pressureMPa.textContent = textValue;
     }
   }
   

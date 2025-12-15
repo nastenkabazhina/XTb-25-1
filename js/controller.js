@@ -35,6 +35,17 @@ class SeparatorController {
    * Привязка обработчиков контролов
    */
   bindControls() {
+    // Обновление показателя расхода на входе при инициализации и изменениях
+    const updateInletFlowText = () => {
+      const inletFlow = this.model.state.inletFlow || 5000; // по умолчанию 5000
+      const inletFlowText = document.getElementById('inletFlowText');
+      if (inletFlowText) {
+        inletFlowText.textContent = inletFlow + ' м³/сут';
+      }
+    };
+    updateInletFlowText();
+    this.model.subscribe(() => updateInletFlowText());
+    
     // Клапан регулятора давления (газ)
     const gasSlider = document.getElementById('gas');
     const gasValDisplay = document.getElementById('gasVal');
@@ -52,6 +63,11 @@ class SeparatorController {
         const pressure = 2.5 * gasValue; // Простая линейная зависимость
         if (pressureValDisplay) {
           pressureValDisplay.textContent = pressure.toFixed(2);
+          // Обновляем левый нижний индикатор давления
+          const leftBottomPressure = document.getElementById('pressureMPa');
+          if (leftBottomPressure) {
+            leftBottomPressure.textContent = pressure.toFixed(3) + ' МПа';
+          }
         }
         
         // Обновляем состояние клапана
@@ -90,6 +106,11 @@ class SeparatorController {
         if (this.model.state.waterValve !== valveOpen) {
           this.model.updateParameter('waterValve', valveOpen);
           this.updateValves();
+        }
+        // Обновляем левый нижний индикатор воды
+        const leftBottomWater = document.getElementById('waterLevelText');
+        if (leftBottomWater) {
+          leftBottomWater.textContent = waterVal.toFixed(3) + ' мм';
         }
       });
       waterLevelSlider.dispatchEvent(new Event('input'));
@@ -169,7 +190,12 @@ class SeparatorController {
   updatePressure() {
     const pressure = this.model.calculatePressure();
     this.view.updatePressure(pressure);
-    this.view.updateControlValue('pressureMPa', pressure.toFixed(2));
+    // Обновляем левый нижний индикатор давления
+    const leftBottomPressure = document.getElementById('pressureMPa');
+    if (leftBottomPressure) {
+      leftBottomPressure.textContent = pressure.toFixed(3) + ' МПа';
+    }
+    
     this.checkAlerts();
   }
   
