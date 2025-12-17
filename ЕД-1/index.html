@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цифровой двойник ЕПП-100</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #080bc7 0%, #080bc7 100%);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* Левая панель - Управление */
+        .control-panel {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-panel h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .accordion-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .accordion-item.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #000000;
+        }
+
+        .accordion-header {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .accordion-header::after {
+            content: '▼';
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-item.active .accordion-header::after {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .parameter-control {
+            padding: 20px;
+        }
+
+        .parameter-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .parameter-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #000000;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #000000;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Центральная панель - Визуализация */
+        .visualization-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .visualization-panel h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #tankCanvas {
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 100%);
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+            max-height: 70vh;
+        }
+
+        /* Правая панель - Информация */
+        .info-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-window {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .info-window h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .info-window.warning {
+            border: 3px solid #f44336;
+            background: rgba(244, 67, 54, 0.2);
+            display: none;
+        }
+
+        .info-window.warning.active {
+            display: block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+        }
+
+        .forecast-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            border-left: 4px solid #000000;
+        }
+
+        .forecast-item.warning {
+            border-left-color: #ff9800;
+        }
+
+        .forecast-item.danger {
+            border-left-color: #f44336;
+        }
+
+        .warning-message {
+            color: #f44336;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .warning-instruction {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.normal {
+            background: #25fd29;
+            box-shadow: 0 0 10px #25fd29;
+        }
+
+        .status-indicator.warning {
+            background: #ff9800;
+            box-shadow: 0 0 10px #ff9800;
+        }
+
+        .status-indicator.danger {
+            background: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Левая панель - Управление -->
+        <div class="control-panel">
+            <h2>Управление</h2>
+            <div class="accordion">
+                <div class="accordion-item active" data-param="level">
+                    <div class="accordion-header">
+                        <span>Уровень заполнения (L)</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="parameter-control">
+                            <div class="parameter-label">
+                                <span>Минимум: 0%</span>
+                                <span>Максимум: 100%</span>
+                            </div>
+                            <div class="parameter-value" id="levelValue">50%</div>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="levelSlider" 
+                                       min="0" max="100" value="50" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item active" data-param="temperature">
+                    <div class="accordion-header">
+                        <span>Температура (T)</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="parameter-control">
+                            <div class="parameter-label">
+                                <span>Минимум: -20°C</span>
+                                <span>Максимум: +80°C</span>
+                            </div>
+                            <div class="parameter-value" id="temperatureValue">20°C</div>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="temperatureSlider" 
+                                       min="-20" max="80" value="20" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item active" data-param="pressure">
+                    <div class="accordion-header">
+                        <span>Давление (P)</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="parameter-control">
+                            <div class="parameter-label">
+                                <span>Минимум: 0 кПа</span>
+                                <span>Максимум: 25 кПа</span>
+                            </div>
+                            <div class="parameter-value" id="pressureValue">10.0 кПа</div>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="pressureSlider" 
+                                       min="0" max="25" value="10" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Центральная панель - Визуализация -->
+        <div class="visualization-panel">
+            <h2>Модель ЕПП-100</h2>
+            <canvas id="tankCanvas" width="800" height="400"></canvas>
+        </div>
+
+        <!-- Правая панель - Информация -->
+        <div class="info-panel">
+            <div class="info-window">
+                <h3>Прогнозы и рекомендации</h3>
+                <div id="forecastContent">
+                    <div class="forecast-item">
+                        <span class="status-indicator normal"></span>
+                        <strong>Состояние системы:</strong> Нормальное
+                    </div>
+                    <div class="forecast-item">
+                        <span class="status-indicator normal"></span>
+                        <strong>Уровень заполнения:</strong> В пределах нормы
+                    </div>
+                    <div class="forecast-item">
+                        <span class="status-indicator normal"></span>
+                        <strong>Температурный режим:</strong> Стабильный
+                    </div>
+                    <div class="forecast-item">
+                        <span class="status-indicator normal"></span>
+                        <strong>Давление:</strong> Безопасное
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-window warning" id="warningWindow">
+                <h3>⚠ Предупреждения</h3>
+                <div id="warningContent">
+                    <div class="warning-message">Обнаружена угроза аварии!</div>
+                    <div class="warning-instruction" id="warningInstruction">
+                        Проверьте параметры системы и примите меры по стабилизации.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Математические константы модели
+        const k1 = 0.15; // Коэффициент влияния уровня на давление (кПа/%)
+        const k2 = 0.1;  // Коэффициент влияния температуры на давление (кПа/°C)
+        const P0 = 0.5;  // Базовое давление (кПа)
+
+        // Параметры системы
+        let level = 50;        // Уровень заполнения (%)
+        let temperature = 20;  // Температура (°C)
+        let pressure = 10;     // Давление (кПа)
+
+        // Нормативные значения
+        const LEVEL_MAX = 90;
+        const LEVEL_MIN = 10;
+        const TEMP_MAX = 70;
+        const TEMP_MIN = -10;
+        const PRESSURE_MAX = 20;
+        const PRESSURE_MIN = 0.5;
+
+        // Элементы DOM
+        const levelSlider = document.getElementById('levelSlider');
+        const temperatureSlider = document.getElementById('temperatureSlider');
+        const pressureSlider = document.getElementById('pressureSlider');
+        const levelValue = document.getElementById('levelValue');
+        const temperatureValue = document.getElementById('temperatureValue');
+        const pressureValue = document.getElementById('pressureValue');
+        const forecastContent = document.getElementById('forecastContent');
+        const warningWindow = document.getElementById('warningWindow');
+        const warningInstruction = document.getElementById('warningInstruction');
+        const canvas = document.getElementById('tankCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Аккордеон отключен: вкладки всегда открыты
+
+        // Функция расчета давления на основе уровня и температуры
+        function calculatePressure(level, temp) {
+            return k1 * level + k2 * temp + P0;
+        }
+
+        // Функция обновления всех параметров
+        function updateParameters() {
+            // Обновление отображения значений
+            levelValue.textContent = level.toFixed(1) + '%';
+            temperatureValue.textContent = temperature.toFixed(1) + '°C';
+            pressureValue.textContent = pressure.toFixed(2) + ' кПа';
+
+            // Обновление визуализации
+            drawTank();
+
+            // Обновление прогнозов и предупреждений
+            updateForecasts();
+            checkWarnings();
+        }
+
+        // Обработчики ползунков
+        levelSlider.addEventListener('input', function() {
+            level = parseFloat(this.value);
+            // Автоматический пересчет давления при изменении уровня
+            pressure = calculatePressure(level, temperature);
+            pressureSlider.value = pressure;
+            updateParameters();
+        });
+
+        temperatureSlider.addEventListener('input', function() {
+            temperature = parseFloat(this.value);
+            // Автоматический пересчет давления при изменении температуры
+            pressure = calculatePressure(level, temperature);
+            pressureSlider.value = pressure;
+            updateParameters();
+        });
+
+        pressureSlider.addEventListener('input', function() {
+            pressure = parseFloat(this.value);
+            // При ручной установке давления, пересчитываем уровень или температуру
+            // Для простоты, пересчитываем уровень обратно
+            const newLevel = (pressure - k2 * temperature - P0) / k1;
+            if (newLevel >= 0 && newLevel <= 100) {
+                level = newLevel;
+                levelSlider.value = level;
+            }
+            updateParameters();
+        });
+
+        // Функция отрисовки ёмкости
+        function drawTank() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const tankWidth = width * 0.8;
+            const tankHeight = height * 0.4;
+            const tankX = (width - tankWidth) / 2;
+            const tankY = (height - tankHeight) / 2;
+
+            // Очистка canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Фон
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Определение цвета жидкости на основе температуры
+            let liquidColor;
+            if (temperature < 0) {
+                liquidColor = '#000000'; // Черный для низких температур
+            } else if (temperature < 30) {
+                liquidColor = '#000000'; // Черный для нормальных температур
+            } else if (temperature < 60) {
+                liquidColor = '#000000'; // Черный для повышенных температур
+            } else {
+                liquidColor = '#000000'; // Черный для высоких температур
+            }
+
+            // Определение цвета для давления (индикация)
+            let pressureColor = '#4CAF50';
+            if (pressure > PRESSURE_MAX * 0.8) {
+                pressureColor = '#f44336';
+            } else if (pressure > PRESSURE_MAX * 0.6) {
+                pressureColor = '#FF9800';
+            }
+
+            // Отрисовка прямоугольной ёмкости (вид сбоку)
+            // Корпус ёмкости
+            ctx.fillStyle = '#d3d3d3';
+            ctx.fillRect(tankX, tankY, tankWidth, tankHeight);
+            
+            // Рамка ёмкости
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(tankX, tankY, tankWidth, tankHeight);
+
+            // Уровень заполнения
+            const fillHeight = (level / 100) * tankHeight;
+            const fillY = tankY + tankHeight - fillHeight;
+
+            // Жидкость в ёмкости
+            if (level > 0) {
+                ctx.fillStyle = liquidColor;
+                ctx.fillRect(tankX, fillY, tankWidth, fillHeight);
+                
+                // Верхняя граница жидкости (линия раздела фаз)
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(tankX, fillY);
+                ctx.lineTo(tankX + tankWidth, fillY);
+                ctx.stroke();
+            }
+
+            // Индикатор уровня
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(tankX - 20, fillY);
+            ctx.lineTo(tankX, fillY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Текст уровня
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(`${level.toFixed(1)}%`, tankX - 80, fillY + 5);
+
+            // Индикатор давления (газовая фаза)
+            const pressureHeight = ((pressure / PRESSURE_MAX) * tankHeight * 0.3);
+            ctx.fillStyle = pressureColor;
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(tankX + tankWidth + 10, tankY + tankHeight - pressureHeight, 15, pressureHeight);
+            ctx.globalAlpha = 1.0;
+
+            // Текст давления
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`P: ${pressure.toFixed(2)} кПа`, tankX + tankWidth + 30, tankY + tankHeight / 2);
+
+            // Индикатор температуры
+            ctx.fillStyle = liquidColor;
+            ctx.fillRect(tankX - 30, tankY, 10, tankHeight);
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 14px Arial';
+            ctx.save();
+            ctx.translate(tankX - 50, tankY + tankHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(`T: ${temperature.toFixed(1)}°C`, 0, 0);
+            ctx.restore();
+
+            // Анимация при критических значениях
+            if (level > LEVEL_MAX || pressure > PRESSURE_MAX * 0.8 || temperature > TEMP_MAX) {
+                ctx.strokeStyle = '#f44336';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([10, 5]);
+                ctx.strokeRect(tankX - 5, tankY - 5, tankWidth + 10, tankHeight + 10);
+                ctx.setLineDash([]);
+            }
+        }
+
+        // Функция обновления прогнозов
+        function updateForecasts() {
+            let forecasts = [];
+
+            // Анализ уровня
+            let levelStatus = 'normal';
+            let levelText = 'Уровень заполнения в пределах нормы';
+            if (level > LEVEL_MAX) {
+                levelStatus = 'danger';
+                levelText = 'КРИТИЧЕСКИЙ УРОВЕНЬ! Риск перелива. Необходимо снизить уровень заполнения.';
+            } else if (level > LEVEL_MAX * 0.8) {
+                levelStatus = 'warning';
+                levelText = 'Высокий уровень заполнения. Рекомендуется контроль.';
+            } else if (level < LEVEL_MIN) {
+                levelStatus = 'warning';
+                levelText = 'Низкий уровень заполнения. Проверьте систему подачи.';
+            }
+
+            // Анализ температуры
+            let tempStatus = 'normal';
+            let tempText = 'Температурный режим стабильный';
+            if (temperature > TEMP_MAX) {
+                tempStatus = 'danger';
+                tempText = 'КРИТИЧЕСКАЯ ТЕМПЕРАТУРА! Риск активации системы аварийного сброса. Требуется охлаждение.';
+            } else if (temperature > TEMP_MAX * 0.8) {
+                tempStatus = 'warning';
+                tempText = 'Повышенная температура. Рекомендуется мониторинг.';
+            } else if (temperature < TEMP_MIN) {
+                tempStatus = 'warning';
+                tempText = 'Низкая температура. Возможна кристаллизация.';
+            }
+
+            // Анализ давления
+            let pressureStatus = 'normal';
+            let pressureText = 'Давление в пределах нормы';
+            if (pressure > PRESSURE_MAX) {
+                pressureStatus = 'danger';
+                pressureText = 'КРИТИЧЕСКОЕ ДАВЛЕНИЕ! Риск разгерметизации. Требуется немедленное снижение давления.';
+            } else if (pressure > PRESSURE_MAX * 0.8) {
+                pressureStatus = 'warning';
+                pressureText = 'Высокое давление. Рекомендуется контроль герметичности.';
+            } else if (pressure < PRESSURE_MIN) {
+                pressureStatus = 'warning';
+                pressureText = 'Низкое давление. Проверьте систему.';
+            }
+
+            // Общее состояние
+            let overallStatus = 'normal';
+            let overallText = 'Состояние системы: Нормальное';
+            if (levelStatus === 'danger' || tempStatus === 'danger' || pressureStatus === 'danger') {
+                overallStatus = 'danger';
+                overallText = 'Состояние системы: КРИТИЧЕСКОЕ';
+            } else if (levelStatus === 'warning' || tempStatus === 'warning' || pressureStatus === 'warning') {
+                overallStatus = 'warning';
+                overallText = 'Состояние системы: Требует внимания';
+            }
+
+            forecasts.push({
+                status: overallStatus,
+                text: overallText
+            });
+            forecasts.push({
+                status: levelStatus,
+                text: `Уровень заполнения: ${levelText}`
+            });
+            forecasts.push({
+                status: tempStatus,
+                text: `Температурный режим: ${tempText}`
+            });
+            forecasts.push({
+                status: pressureStatus,
+                text: `Давление: ${pressureText}`
+            });
+
+            // Прогноз на основе взаимосвязи параметров
+            const predictedPressure = calculatePressure(level, temperature);
+            const pressureDiff = Math.abs(pressure - predictedPressure);
+            
+            if (pressureDiff > 2) {
+                forecasts.push({
+                    status: 'warning',
+                    text: `Расхождение расчетного и фактического давления: ${pressureDiff.toFixed(2)} кПа. Проверьте герметичность системы.`
+                });
+            }
+
+            // Отображение прогнозов
+            forecastContent.innerHTML = forecasts.map(f => `
+                <div class="forecast-item ${f.status}">
+                    <span class="status-indicator ${f.status}"></span>
+                    ${f.text}
+                </div>
+            `).join('');
+        }
+
+        // Функция проверки предупреждений
+        function checkWarnings() {
+            const hasWarning = level > LEVEL_MAX || 
+                              level < LEVEL_MIN || 
+                              temperature > TEMP_MAX || 
+                              temperature < TEMP_MIN || 
+                              pressure > PRESSURE_MAX || 
+                              pressure < PRESSURE_MIN;
+
+            if (hasWarning) {
+                warningWindow.classList.add('active');
+                
+                let instructions = [];
+                
+                if (level > LEVEL_MAX) {
+                    instructions.push('1. НЕМЕДЛЕННО снизьте уровень заполнения до безопасного значения (< 90%)');
+                }
+                if (level < LEVEL_MIN) {
+                    instructions.push('1. Проверьте систему подачи и увеличьте уровень заполнения');
+                }
+                if (temperature > TEMP_MAX) {
+                    instructions.push('2. Активируйте систему охлаждения. Температура критическая!');
+                }
+                if (temperature < TEMP_MIN) {
+                    instructions.push('2. Проверьте систему подогрева для предотвращения кристаллизации');
+                }
+                if (pressure > PRESSURE_MAX) {
+                    instructions.push('3. КРИТИЧЕСКОЕ ДАВЛЕНИЕ! Немедленно снизьте давление через систему сброса');
+                }
+                if (pressure < PRESSURE_MIN) {
+                    instructions.push('3. Проверьте герметичность системы. Давление ниже нормы');
+                }
+
+                warningInstruction.innerHTML = `
+                    <strong>УГРОЗА АВАРИИ ОБНАРУЖЕНА!</strong><br><br>
+                    ${instructions.join('<br>')}<br><br>
+                    <strong>Рекомендуемый порядок действий:</strong><br>
+                    ${instructions.length > 0 ? instructions.map((inst, i) => inst.replace(/^\d+\./, `${i + 1}.`)).join('<br>') : 'Проверьте все параметры системы'}
+                `;
+            } else {
+                warningWindow.classList.remove('active');
+            }
+        }
+
+        // Инициализация
+        updateParameters();
+    </script>
+
+</body>
+</html>

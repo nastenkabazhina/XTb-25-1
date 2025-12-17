@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цифровой двойник НГС-1</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Левая панель управления -->
+        <div class="left-panel">
+            <h2>Параметры управления</h2>
+            <div class="accordion">
+                <!-- Параметр 1: Давление -->
+                <div class="accordion-item active">
+                    <div class="accordion-header">
+                        <span>Давление (P)</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="parameter-control">
+                            <label>
+                                <span class="param-label">Давление в сепараторе</span>
+                                <span class="param-value" id="pressure-value">3.5</span>
+                                <span class="param-unit">МПа</span>
+                            </label>
+                            <input type="range" id="pressure-slider" min="0.6" max="6.3" step="0.1" value="3.5" class="slider">
+                            <div class="param-range">
+                                <span>0.6</span>
+                                <span>6.3</span>
+                            </div>
+                        </div>
+                        <div class="dependent-param">
+                            <div class="dependent-label">Степень сепарации газа (K1):</div>
+                            <div class="dependent-value" id="k1-value">85.0</div>
+                            <div class="dependent-unit">%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Параметр 2: Температура -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Температура (T)</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="parameter-control">
+                            <label>
+                                <span class="param-label">Температура потока на входе</span>
+                                <span class="param-value" id="temperature-value">55</span>
+                                <span class="param-unit">°C</span>
+                            </label>
+                            <input type="range" id="temperature-slider" min="20" max="90" step="1" value="55" class="slider">
+                            <div class="param-range">
+                                <span>20</span>
+                                <span>90</span>
+                            </div>
+                        </div>
+                        <div class="dependent-param">
+                            <div class="dependent-label">Обводненность нефти на выходе (K2):</div>
+                            <div class="dependent-value" id="k2-value">3.2</div>
+                            <div class="dependent-unit">%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Параметр 3: Расход -->
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Расход (Q)</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="parameter-control">
+                            <label>
+                                <span class="param-label">Расход эмульсии на входе</span>
+                                <span class="param-value" id="flowrate-value">500</span>
+                                <span class="param-unit">м³/сут</span>
+                            </label>
+                            <input type="range" id="flowrate-slider" min="100" max="1000" step="10" value="500" class="slider">
+                            <div class="param-range">
+                                <span>100</span>
+                                <span>1000</span>
+                            </div>
+                        </div>
+                        <div class="dependent-param">
+                            <div class="dependent-label">Фактическая производительность по газу (Q_gas):</div>
+                            <div class="dependent-value" id="qgas-value">425.0</div>
+                            <div class="dependent-unit">м³/сут</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Центральная панель визуализации -->
+        <div class="center-panel">
+            <h2>Визуализация сепаратора НГС-1</h2>
+            <canvas id="separator-canvas" width="800" height="600"></canvas>
+        </div>
+
+        <!-- Правая панель информации -->
+        <div class="right-panel">
+            <div class="info-window">
+                <h3>Эффективность и показатели</h3>
+                <div class="kpi-container">
+                    <div class="kpi-item">
+                        <div class="kpi-label">Степень сепарации газа (K1)</div>
+                        <div class="kpi-value" id="kpi-k1">85.0</div>
+                        <div class="kpi-unit">%</div>
+                    </div>
+                    <div class="kpi-item">
+                        <div class="kpi-label">Обводненность нефти (K2)</div>
+                        <div class="kpi-value" id="kpi-k2">3.2</div>
+                        <div class="kpi-unit">%</div>
+                    </div>
+                    <div class="kpi-item">
+                        <div class="kpi-label">Расход газа (Q_gas)</div>
+                        <div class="kpi-value" id="kpi-qgas">425.0</div>
+                        <div class="kpi-unit">м³/сут</div>
+                    </div>
+                    <div class="kpi-item">
+                        <div class="kpi-label">Прогнозируемое давление на следующую ступень</div>
+                        <div class="kpi-value" id="kpi-next-pressure">3.2</div>
+                        <div class="kpi-unit">МПа</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-window warnings-window" id="warnings-window" style="display: none;">
+                <h3>Предупреждения</h3>
+                <div class="warnings-container" id="warnings-container">
+                    <!-- Предупреждения будут добавлены динамически -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
