@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цифровой двойник ПП-1.6 - МУПН</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Левая панель управления -->
+        <div class="control-panel">
+            <h2>Управление параметрами</h2>
+            
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Скорость потока (V)</span>
+                        <span class="value-display" id="v-value">0.14 м/с</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="slider-container">
+                            <div class="zone-markers">
+                                <span class="zone-marker zone-danger" style="left: 0%">Риск отложений</span>
+                                <span class="zone-marker zone-optimal" style="left: 45%">Оптимальный режим</span>
+                                <span class="zone-marker zone-warning" style="left: 90%">Риск недогрева</span>
+                            </div>
+                            <input type="range" id="v-slider" min="0.14" max="0.8" step="0.01" value="0.14" class="slider">
+                            <div class="slider-labels">
+                                <span>0.14 м/с</span>
+                                <span>0.8 м/с</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <span>Температура входа (T_вх)</span>
+                        <span class="value-display" id="tvh-value">10°C</span>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="slider-container">
+                            <input type="range" id="tvh-slider" min="10" max="30" step="0.1" value="10" class="slider">
+                            <div class="slider-labels">
+                                <span>10°C</span>
+                                <span>30°C</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Центральная визуализация -->
+        <div class="visualization-panel">
+            <h2>Визуализация подогревателя ПП-1.6</h2>
+            <div class="visualization-container">
+                <svg id="heater-svg" width="800" height="600" viewBox="0 0 800 600">
+                    <defs>
+                        <linearGradient id="coilGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" id="gradient-start" stop-color="#4A90E2"/>
+                            <stop offset="100%" id="gradient-end" stop-color="#FF4500"/>
+                        </linearGradient>
+
+                        <!-- Градиент и фильтры для реалистичного пламени -->
+                        <radialGradient id="flameGradient" cx="50%" cy="70%" r="60%">
+                            <stop offset="0%" stop-color="#fff59d" stop-opacity="1"/>
+                            <stop offset="40%" stop-color="#ffd54f" stop-opacity="1"/>
+                            <stop offset="70%" stop-color="#ff8a00" stop-opacity="0.95"/>
+                            <stop offset="100%" stop-color="#ff4500" stop-opacity="0"/>
+                        </radialGradient>
+
+                        <filter id="flameBlur" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur stdDeviation="1.2" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </feMerge>
+                        </filter>
+
+                        <!-- Градиент и фильтр для дыма -->
+                        <linearGradient id="smokeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#cfcfcf" stop-opacity="0.95"/>
+                            <stop offset="40%" stop-color="#bfbfbf" stop-opacity="0.7"/>
+                            <stop offset="100%" stop-color="#9f9f9f" stop-opacity="0"/>
+                        </linearGradient>
+
+                        <filter id="smokeFilter" x="-50%" y="-50%" width="200%" height="200%">
+                            <!-- Дисперсия для волнистости -->
+                            <feTurbulence baseFrequency="0.6" numOctaves="2" seed="5" result="turb"/>
+                            <feDisplacementMap in="SourceGraphic" in2="turb" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+                            <!-- Мягкое размытие -->
+                            <feGaussianBlur stdDeviation="2" result="blur"/>
+                            <!-- Лёгкая тонировка и затухание -->
+                            <feColorMatrix type="matrix" values="0.6 0 0 0 0  0 0.6 0 0 0  0 0 0.6 0 0  0 0 0 0.8 0"/>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Внешний корпус (прямоугольник с закругленными углами) -->
+                    <rect x="100" y="200" width="600" height="200" fill="C0C0C0" stroke="#C0C0C0" stroke-width="4" rx="15"/>
+                    <rect x="100" y="200" width="600" height="200" fill="#C0C0C0" opacity="0.3"/>
+                    
+                    <!-- Внутренняя камера (светло-голубая) -->
+                    <rect x="120" y="220" width="560" height="160" fill="#C0C0C0" stroke="#C0C0C0" stroke-width="2" rx="10"/>
+                    
+                    <!-- Входная труба (синяя) -->
+                    <rect x="50" y="290" width="60" height="20" fill="#000000" stroke="#0000CD" stroke-width="2" rx="3"/>
+                    <text x="80" y="280" text-anchor="middle" font-size="16" fill="#000" font-weight="bold">Вход</text>
+                    <text x="80" y="330" text-anchor="middle" font-size="12" fill="#666" id="input-temp-label">T_вх = 10°C</text>
+                    
+                    <!-- Выходная труба (синяя) -->
+                    <rect x="690" y="290" width="60" height="20" fill="#000000" stroke="#0000CD" stroke-width="2" rx="3"/>
+                    <text x="720" y="280" text-anchor="middle" font-size="16" fill="#000" font-weight="bold">Выход</text>
+                    <text x="720" y="330" text-anchor="middle" font-size="12" fill="#666" id="output-temp-label">T_out = 20°C</text>
+                    
+                    <!-- Змеевик (волнистая линия - синусоида) -->
+                    <g id="coil-group">
+                        <!-- Создаем волнистый путь змеевика (плавная синусоида) -->
+                        <path id="coil-path" d="M 110 300 
+                                             C 130 280, 150 320, 170 300
+                                             C 190 280, 210 320, 230 300
+                                             C 250 280, 270 320, 290 300
+                                             C 310 280, 330 320, 350 300
+                                             C 370 280, 390 320, 410 300
+                                             C 430 280, 450 320, 470 300
+                                             C 490 280, 510 320, 530 300
+                                             C 550 280, 570 320, 590 300
+                                             C 610 280, 630 320, 650 300
+                                             C 670 280, 690 320, 690 300" 
+                              stroke="#000" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    </g>
+                    
+                    <!-- Белые точки потока (анимация) -->
+                    <circle id="flow-particle-1" r="5" fill="white" opacity="0.9">
+                        <animateMotion id="flow-animation-1" dur="3s" repeatCount="indefinite">
+                            <mpath href="#coil-path"/>
+                        </animateMotion>
+                    </circle>
+                    <circle id="flow-particle-2" r="5" fill="white" opacity="0.8">
+                        <animateMotion dur="3s" begin="0.3s" repeatCount="indefinite">
+                            <mpath href="#coil-path"/>
+                        </animateMotion>
+                    </circle>
+                    <circle id="flow-particle-3" r="5" fill="white" opacity="0.7">
+                        <animateMotion dur="3s" begin="0.6s" repeatCount="indefinite">
+                            <mpath href="#coil-path"/>
+                        </animateMotion>
+                    </circle>
+                    <circle id="flow-particle-4" r="5" fill="white" opacity="0.6">
+                        <animateMotion dur="3s" begin="0.9s" repeatCount="indefinite">
+                            <mpath href="#coil-path"/>
+                        </animateMotion>
+                    </circle>
+                    <circle id="flow-particle-5" r="5" fill="white" opacity="0.5">
+                        <animateMotion dur="3s" begin="1.2s" repeatCount="indefinite">
+                            <mpath href="#coil-path"/>
+                        </animateMotion>
+                    </circle>
+                    
+                    <!-- Горелка (оранжевый прямоугольник внизу по центру) -->
+                    <rect x="360" y="400" width="80" height="20" fill="#FF8C00" stroke="#FF6347" stroke-width="2" rx="5"/>
+                    
+                    <!-- Пламя от горелки -->
+                    <g id="flame-group" transform="translate(0,0)">
+                        <!-- Внешняя мягкая облачная часть -->
+                        <path d="M 376 402 C 386 368, 414 368, 424 402 C 414 388, 396 392, 376 402 Z"
+                              fill="url(#flameGradient)" opacity="0.6" filter="url(#flameBlur)">
+                            <animate attributeName="d" dur="1.6s" repeatCount="indefinite"
+                                     values="M 376 402 C 386 368, 414 368, 424 402 C 414 388, 396 392, 376 402 Z;
+                                             M 376 400 C 386 370, 414 370, 424 400 C 414 390, 396 392, 376 400 Z;
+                                             M 376 402 C 386 368, 414 368, 424 402 C 414 388, 396 392, 376 402 Z"/>
+                            <animateTransform attributeName="transform" type="translate" values="0 0; 0 -6; 0 0" dur="1.6s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.5;0.7;0.6;0.5" dur="1.6s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Средний слой — насыщенный оранжевый -->
+                        <path d="M 382 402 C 392 380, 408 380, 418 402 C 408 394, 392 394, 382 402 Z"
+                              fill="#FF6A00" opacity="0.9">
+                            <animate attributeName="d" dur="1.1s" repeatCount="indefinite"
+                                     values="M 382 402 C 392 380, 408 380, 418 402 C 408 394, 392 394, 382 402 Z;
+                                             M 382 400 C 392 378, 408 382, 418 400 C 408 392, 392 396, 382 400 Z;
+                                             M 382 402 C 392 380, 408 380, 418 402 C 408 394, 392 394, 382 402 Z"/>
+                            <animateTransform attributeName="transform" type="translate" values="0 0; 0 -8; 0 0" dur="1.1s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Внутреннее ядро — жёлтое, быстрые колебания -->
+                        <path d="M 392 402 C 398 390, 402 390, 408 402 C 402 396, 398 396, 392 402 Z"
+                              fill="#FFF176" opacity="1">
+                            <animate attributeName="d" dur="0.9s" repeatCount="indefinite"
+                                     values="M 392 402 C 398 390, 402 390, 408 402 C 402 396, 398 396, 392 402 Z;
+                                             M 392 400 C 398 388, 402 388, 408 400 C 402 394, 398 394, 392 400 Z;
+                                             M 392 402 C 398 390, 402 390, 408 402 C 402 396, 398 396, 392 402 Z"/>
+                            <animate attributeName="opacity" values="0.9;1;0.95;0.9" dur="0.9s" repeatCount="indefinite"/>
+                            <animateTransform attributeName="transform" type="translate" values="0 0; 0 -10; 0 0" dur="0.9s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Проблески искр/горящих язычков -->
+                        <path d="M 398 398 Q 400 386, 404 398" stroke="#FFD700" stroke-width="1.5" fill="none" opacity="0.9">
+                            <animate attributeName="opacity" values="0.0;1;0.0" dur="0.6s" repeatCount="indefinite" begin="0.1s"/>
+                        </path>
+                    </g>
+                    
+                    <!-- Дымоход (коричневый прямоугольник сверху справа) -->
+                    <rect x="550" y="150" width="30" height="50" fill="#8B4513" stroke="#654321" stroke-width="2" rx="3"/>
+                    
+                    <!-- Дым из дымохода (серые облака) -->
+                    <g id="smoke-group">
+                        <g class="smoke-puff" transform="translate(565,150)">
+                            <ellipse cx="0" cy="0" rx="10" ry="12" fill="url(#smokeGradient)" opacity="0.8" filter="url(#smokeFilter)">
+                                <animate attributeName="cy" from="0" to="-90" dur="4.5s" repeatCount="indefinite"/>
+                                <animate attributeName="rx" values="10;18;28" dur="4.5s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.8;0.5;0" dur="4.5s" repeatCount="indefinite"/>
+                                <animateTransform attributeName="transform" type="translate" values="0 0; -8 -35; 6 -90; 0 -140" dur="4.5s" repeatCount="indefinite"/>
+                            </ellipse>
+                        </g>
+
+                        <g class="smoke-puff" transform="translate(575,145)">
+                            <ellipse cx="0" cy="0" rx="12" ry="16" fill="url(#smokeGradient)" opacity="0.7" filter="url(#smokeFilter)">
+                                <animate attributeName="cy" from="0" to="-110" dur="5.8s" begin="0.6s" repeatCount="indefinite"/>
+                                <animate attributeName="rx" values="12;22;36" dur="5.8s" begin="0.6s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.7;0.45;0" dur="5.8s" begin="0.6s" repeatCount="indefinite"/>
+                                <animateTransform attributeName="transform" type="translate" values="0 0; 10 -50; -10 -110; 0 -160" dur="5.8s" begin="0.6s" repeatCount="indefinite"/>
+                            </ellipse>
+                        </g>
+
+                        <g class="smoke-puff" transform="translate(560,155)">
+                            <ellipse cx="0" cy="0" rx="8" ry="10" fill="url(#smokeGradient)" opacity="0.6" filter="url(#smokeFilter)">
+                                <animate attributeName="cy" from="0" to="-72" dur="3.6s" begin="1.1s" repeatCount="indefinite"/>
+                                <animate attributeName="rx" values="8;16;26" dur="3.6s" begin="1.1s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.6;0.3;0" dur="3.6s" begin="1.1s" repeatCount="indefinite"/>
+                                <animateTransform attributeName="transform" type="translate" values="0 0; -6 -28; 6 -72; 0 -100" dur="3.6s" begin="1.1s" repeatCount="indefinite"/>
+                            </ellipse>
+                        </g>
+
+                        <g class="smoke-puff" transform="translate(570,160)">
+                            <ellipse cx="0" cy="0" rx="6" ry="8" fill="url(#smokeGradient)" opacity="0.5" filter="url(#smokeFilter)">
+                                <animate attributeName="cy" from="0" to="-60" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+                                <animate attributeName="rx" values="6;12;18" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.5;0.2;0" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+                                <animateTransform attributeName="transform" type="translate" values="0 0; -4 -20; 4 -60; 0 -80" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+                            </ellipse>
+                        </g>
+
+                        <!-- Лёгкий фон для высоких тонов дыма -->
+                        <g transform="translate(568,170)">
+                            <ellipse cx="0" cy="0" rx="22" ry="28" fill="url(#smokeGradient)" opacity="0.12" filter="url(#smokeFilter)">
+                                <animate attributeName="cy" from="0" to="-140" dur="7s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="0.12;0.06;0" dur="7s" repeatCount="indefinite"/>
+                            </ellipse>
+                        </g>
+                    </g>
+                </svg>
+                
+                <!-- Температура установки (крупно) -->
+                <div class="output-temperature">
+                    <div class="temp-label">Температура установки</div>
+                    <div class="temp-value" id="tout-display">20.0°C</div>
+                </div>
+                
+                <!-- Формула (скрыта) -->
+                <div class="formula-display" style="display: none;">
+                    <div class="formula-label">Расчетная формула:</div>
+                    <div class="formula-text" id="formula-text">
+                        T_settled = 20 + 50 × ((V - 0.14) / 0.66)<sup>0.8</sup> + 0.4 × (T_вх - 10)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Правая панель информации -->
+        <div class="info-panel">
+            <h2>Прогнозы и рекомендации</h2>
+            <div class="info-window" id="forecast-window">
+                <div id="forecast-content">
+                    <p>Установите параметры для получения прогноза</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
+
