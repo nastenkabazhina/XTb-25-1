@@ -47,7 +47,7 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "portable",
           "arch": [
             "x64"
           ]
@@ -56,13 +56,6 @@
       "icon": "build/icon.ico",
       "sign": null,
       "verifyUpdateCodeSignature": false
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "МУПН"
     },
     "mac": {
       "target": "dmg",
