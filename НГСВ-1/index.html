@@ -1,0 +1,296 @@
+          
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Цифровой двойник трехфазного сепаратора</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a href="../Главная страница/index.html" class="back-button">
+    <span>←</span> Назад на главную
+  </a>
+  <div class="page">
+    <!-- Левая панель: Управление клапанами -->
+    <aside class="sidebar">
+      <h2>Управление клапанами</h2>
+      <div class="tabs">
+        <button class="tab-btn" data-tab="pressureVolume">Клапан регулятора объема давления</button>
+        <button class="tab-btn" data-tab="waterLevel">Клапан регулятора уровня воды в основной камере</button>
+        <button class="tab-btn" data-tab="oilLevel">Клапан регулятора уровня нефти в основной камере</button>
+      </div>
+      
+      <!-- Вкладка: Клапан регулятора объема давления -->
+      <div id="pressureVolume" class="tab-content">
+        <div class="control">
+          <label>Степень открытия клапана (Gas): <span id="gasVal">0.5</span></label>
+          <input type="range" id="gas" min="0" max="1" step="0.01" value="0.5">
+          <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
+        </div>
+        <div class="control pressureDisplay">
+          <small>Давление: <span id="pressureVal">2.5</span> МПа</small>
+        </div>
+      </div>
+      <!-- Вкладка: Регулятор давления -->
+        <!-- Вкладка: Клапан регулятора уровня воды -->
+        <div id="waterLevel" class="tab-content">
+          <div class="control">
+            <label>Степень открытия клапана (К): <span id="waterLevelKVal">0.5</span></label>
+            <input type="range" id="waterLevelK" min="0.1" max="1" step="0.01" value="0.5">
+            <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
+          </div>
+          <div class="control">
+            <small>Вода: <span id="waterLevelVal">0.0</span></small>
+          </div>
+        </div>
+      
+        <!-- Вкладка: Регулятор нефти -->
+        <div id="oil" class="tab-content">
+          <div class="control">
+            <label>Коэффициент пропускной способности (Cv), м³/ч: <span id="oilCvVal">20</span></label>
+            <input type="range" id="oilCv" min="0" max="56" step="1" value="20">
+          </div>
+          <div class="control">
+            <label>Перепад давления (ΔP), бар: <span id="oilDpVal">4</span></label>
+            <input type="range" id="oilDp" min="0" max="8.5" step="0.1" value="4">
+          </div>
+          <div class="control">
+            <label>Степень открытия клапана (u): <span id="oilUVal">0.5</span></label>
+            <input type="range" id="oilU" min="0" max="1" step="0.01" value="0.5">
+          </div>
+          <!-- Индикатор уровня нефти перемещён в правую панель -->
+        </div>
+      
+      <!-- Вкладка: Регулятор воды -->
+      <div id="water" class="tab-content">
+        <div class="control">
+          <label>Степень открытия клапана (К): <span id="waterKVal">0.5</span></label>
+          <input type="range" id="waterK" min="0" max="1" step="0.01" value="0.5">
+          <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
+        </div>
+        <div class="control">
+          <label>Расход жидкости Q (м³/сут): <span id="waterQVal">100</span></label>
+          <input type="range" id="waterQ" min="100" max="1000" step="10" value="100">
+        </div>
+        <div class="control">
+          <small>Давление в сепараторе (MPa) рассчитывается по формуле: P = 20.0 − 19.9 × sqrt((K − 0.1) / (0.9 × (1 + Q/8000))).</small>
+        </div>
+        <!-- Большой индикатор уровня воды перемещён в правую панель -->
+      </div>
+      
+      <!-- Вкладка: Регулятор нефти -->
+        <!-- Вкладка: Клапан регулятора уровня нефти -->
+        <div id="oilLevel" class="tab-content">
+          <div class="control">
+            <label>Степень открытия клапана (К): <span id="oilLevelKVal">0.5</span></label>
+            <input type="range" id="oilLevelK" min="0.1" max="1" step="0.01" value="0.5">
+            <small>0 - клапан закрыт, 0.5 - оптимально (наполовину), 1 - полностью открыт</small>
+          </div>
+          <div class="control">
+            <small>Нефть: <span id="oilLevelVal">0.0</span></small>
+          </div>
+        </div>
+    </aside>
+
+    <!-- Центральная панель: Цифровой двойник -->
+    <main class="main">
+      <div class="title">Цифровой двойник НГСВ-1</div>
+      <div class="sim-area">
+        <!-- Сепаратор -->
+        <div class="separator" id="separator">
+          <div class="phase-layer water" id="waterLayer" style="height:30%;"></div>
+          <div class="phase-layer oil" id="oilLayer" style="height:30%;"></div>
+          <div class="phase-layer gas" id="gasLayer" style="height:40%;"></div>
+          
+          <!-- Вертикальная перегородка -->
+          <div class="separator-baffle" id="separatorBaffle"></div>
+          
+          <!-- Секция после перегородки (только нефть) -->
+          <div class="phase-layer oil-after-baffle" id="oilLayerAfterBaffle" style="height:0%;"></div>
+        </div>
+
+        <!-- Синий кружочек с надписью Насос удален -->
+
+        <!-- Трубопроводы (SVG для цельных линий) -->
+        <svg class="pipes-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+          <defs>
+            <!-- Градиенты для труб -->
+            <linearGradient id="pipeBlueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#1556d6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#0c3faf;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="pipeBlackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="pipeYellowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#d4b000;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#c0a000;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="pipeInletGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#d0d8e2;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#b9c2cf;stop-opacity:1" />
+            </linearGradient>
+              <!-- Эмульсионная труба (смешение нефти/воды) -->
+              <linearGradient id="pipeEmulsionGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#0b76ff;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#1f1f1f;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#c0a000;stop-opacity:1" />
+              </linearGradient>
+              <pattern id="flowEmulsion" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+                <rect width="10" height="14" fill="#0b76ff"/>
+                <rect x="10" width="10" height="14" fill="#1f1f1f"/>
+                <rect x="20" width="10" height="14" fill="#c0a000"/>
+                <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+              </pattern>
+            
+            <!-- Анимация потока -->
+            <pattern id="flowBlue" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+              <rect width="15" height="14" fill="rgba(255,255,255,0.1)"/>
+              <rect x="15" width="15" height="14" fill="transparent"/>
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+            </pattern>
+            <pattern id="flowBlack" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+              <rect width="15" height="14" fill="rgba(255,255,255,0.18)"/>
+              <rect x="15" width="15" height="14" fill="transparent"/>
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+            </pattern>
+            <pattern id="flowYellow" x="0" y="0" width="30" height="14" patternUnits="userSpaceOnUse">
+              <rect width="15" height="14" fill="rgba(255,255,255,0.2)"/>
+              <rect x="15" width="15" height="14" fill="transparent"/>
+              <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="30 0" dur="1s" repeatCount="indefinite"/>
+            </pattern>
+          </defs>
+
+              <!-- Водяная линия (цельная L-образная труба) -->
+          <g id="waterPipeSvg">
+            <path d="M 200 516 L 460 516 L 460 456 L 420 456" 
+                  stroke="url(#pipeBlueGrad)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="flow-line water-flow" 
+              d="M 200 516 L 460 516 L 460 456 L 420 456" 
+                  stroke="url(#flowBlue)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+          </g>
+          
+              <!-- Нефтяная линия (цельная L-образная труба) -->
+          <g id="oilPipeSvg">
+            <path d="M 780 504 L 700 504 L 700 456 L 740 456" 
+                  stroke="url(#pipeBlackGrad)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="flow-line oil-flow" 
+              d="M 780 504 L 700 504 L 700 456 L 740 456" 
+                  stroke="url(#flowBlack)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+          </g>
+          
+          <!-- Газовая линия (цельная L-образная труба) -->
+          <g id="gasPipeSvg">
+            <path d="M 820 132 L 700 132 L 700 168 L 540 168" 
+                  stroke="url(#pipeYellowGrad)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="flow-line gas-flow" 
+                  d="M 820 132 L 700 132 L 700 168 L 540 168" 
+                  stroke="url(#flowYellow)" stroke-width="14" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+          </g>
+        </svg>
+        
+        <!-- Входная труба (для совместимости с существующим кодом) -->
+        <div class="pipe pipe-emulsion" id="inletPipe" style="left: 1%; top: 56%; width: 15%; height: 14px; opacity: 1;">
+          <div class="flow"></div>
+        </div>
+        
+        <!-- Водяная линия (скрытые div'ы для совместимости) -->
+        <div class="pipe pipe-blue" id="waterPipe" style="left: 20%; bottom: 14%; width: 26%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-blue" style="left: 42%; bottom: 14%; height: 90px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-blue" id="waterPipe2" style="left: 42%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        
+        <!-- Нефтяная линия (скрытые div'ы для совместимости) -->
+        <div class="pipe pipe-black" id="oilPipe" style="right: 8%; bottom: 14%; width: 22%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-black" style="right: 26%; bottom: 14%; height: 90px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-black" id="oilPipe2" style="right: 26%; bottom: 24%; width: 16%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        
+        <!-- Газовая линия (скрытые div'ы для совместимости) -->
+        <div class="pipe pipe-yellow" id="gasPipe" style="right: 12%; top: 22%; width: 18%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe vertical pipe-yellow" style="right: 30%; top: 22%; height: 50px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+        <div class="pipe pipe-yellow" id="gasPipe2" style="right: 30%; top: 28%; width: 16%; height: 14px; opacity: 0;">
+          <div class="flow"></div>
+        </div>
+
+        <!-- Клапаны -->
+        <div class="valve open" id="waterValve" style="left: 42%; bottom: 8%; z-index: 3;">H2O</div>
+
+        <div class="valve open" id="oilValve" style="right: 26%; bottom: 8%; z-index: 3;">Oil</div>
+
+        <div class="valve open" id="gasValve" style="right: 30%; top: 22%; z-index: 12;">Gas</div>
+      </div>
+      
+      <!-- Алерт -->
+      <div class="alert" id="alertBox">Авария</div>
+    </main>
+
+    <!-- Правые окна: Прогнозы по клапанам -->
+    <aside class="forecasts">
+      <h2>Прогнозы</h2>
+
+      <div class="forecast forecast-water" id="waterForecast">
+        <div class="status-badge normal" id="waterForecastBadge">ИНФО</div>
+        <h3 id="waterForecastTitle">Прогноз по водяному клапану</h3>
+        <ol id="waterForecastList">
+          <li>Переместите ползунок «Степень открытия клапана (К)» в разделе «Клапан регулятора уровня воды», чтобы увидеть прогноз.</li>
+        </ol>
+      </div>
+
+      <div class="forecast forecast-oil" id="oilForecast">
+        <div class="status-badge normal" id="oilForecastBadge">ИНФО</div>
+        <h3 id="oilForecastTitle">Прогноз по нефтяному клапану</h3>
+        <ol id="oilForecastList">
+          <li>Переместите ползунок «Степень открытия клапана (К)» в разделе «Клапан регулятора уровня нефти», чтобы увидеть прогноз.</li>
+        </ol>
+      </div>
+    </aside>
+
+    <!-- Левая нижняя панель: Показатели -->
+    <aside class="left-bottom-readouts hidden-characteristics">
+      <div class="readouts">
+        <div class="pill">Давление: <span id="pressureMPa">0.000 МПа</span></div>
+        <div class="pill">Расход на входе: <span id="inletFlowText">200 м³/сут</span></div>
+        <div class="pill">Вода: <span id="waterLevelText">0 мм</span></div>
+        <div class="pill">Нефть: <span id="oilLevelText">0 мм</span></div>
+        <div class="pill">Газ: <span id="gasLevelText">40%</span></div>
+      </div>
+  </aside>
+  </div>
+
+  <!-- Подключение модулей -->
+  <script src="js/model.js"></script>
+  <script src="js/view.js"></script>
+  <script src="js/controller.js"></script>
+  
+  <!-- Инициализация приложения -->
+  <script>
+    // Создание экземпляров компонентов
+    const model = new SeparatorModel();
+    const view = new SeparatorView();
+    const controller = new SeparatorController(model, view);
+  </script>
+</body>
+</html>
