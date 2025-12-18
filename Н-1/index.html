@@ -20,6 +20,30 @@
             overflow-x: hidden;
         }
 
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
         .container {
             display: grid;
             grid-template-columns: 350px 1fr 380px;
@@ -600,6 +624,9 @@
     </style>
 </head>
 <body>
+    <a href="../Главная страница/index.html" class="back-button">
+        <span>←</span> Назад на главную
+    </a>
     <div class="container">
         <!-- Панель управления -->
         <div class="control-panel">

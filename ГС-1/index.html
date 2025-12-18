@@ -38,6 +38,30 @@
             margin-bottom: 20px;
             background: rgba(0, 173, 181, 0.1);
             border-radius: 15px;
+            position: relative;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            background: rgba(0, 255, 245, 0.2);
+            border: 2px solid #00fff5;
+            border-radius: 8px;
+            color: #00fff5;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background: rgba(0, 255, 245, 0.4);
+            transform: translateY(-50%) scale(1.05);
         }
 
         .header h1 {
@@ -596,6 +620,9 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="../Главная страница/index.html" class="back-button">
+                <span>←</span> Назад
+            </a>
             <h1><i class="fas fa-industry"></i> Цифровой двойник газового сепаратора ГС</h1>
         </div>
 
