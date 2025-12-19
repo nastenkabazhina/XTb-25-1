@@ -1496,6 +1496,23 @@
         // Запуск при загрузке страницы
         document.addEventListener('DOMContentLoaded', initialize);
 
+        // Запись статуса в localStorage для главной страницы
+        function updateStatusInStorage() {
+            try {
+                // Пока просто записываем "normal", можно расширить логику
+                localStorage.setItem('mupn_status_ГС-1', JSON.stringify({
+                    status: 'normal',
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.error('Ошибка записи статуса в localStorage:', e);
+            }
+        }
+        
+        // Обновляем статус при загрузке и периодически
+        updateStatusInStorage();
+        setInterval(updateStatusInStorage, 5000);
+
         // Остановка анимации при закрытии страницы
         window.addEventListener('beforeunload', () => {
             if (animationId) {

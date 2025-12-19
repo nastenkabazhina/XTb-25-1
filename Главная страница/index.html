@@ -603,6 +603,24 @@
         let currentObject = null;
         let globalAlarms = [];
 
+        // Получение статуса объекта из localStorage
+        function getObjectStatusFromStorage(objectNumber) {
+            try {
+                const statusData = localStorage.getItem(`mupn_status_${objectNumber}`);
+                if (statusData) {
+                    const data = JSON.parse(statusData);
+                    // Проверяем, что данные не устарели (максимум 30 секунд)
+                    const now = Date.now();
+                    if (data.timestamp && (now - data.timestamp) < 30000) {
+                        return data.status; // 'normal' или 'alarm'
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка чтения статуса из localStorage:', e);
+            }
+            return 'normal'; // По умолчанию
+        }
+
         // Инициализация схемы
         function initScheme() {
             const scheme = document.getElementById('mupn-scheme');
@@ -694,10 +712,32 @@
             const objectList = document.getElementById('object-list');
             objectList.innerHTML = '';
             
+            // Подсчет аварий для глобальной статистики
+            let alarmCount = 0;
+            
             mupnObjects.forEach(obj => {
                 const listItem = document.createElement('li');
                 listItem.className = `object-item ${currentObject && currentObject.id === obj.id ? 'active' : ''}`;
                 listItem.dataset.id = obj.id;
+                
+                // Получаем реальный статус из localStorage
+                const realStatus = getObjectStatusFromStorage(obj.number);
+                const isAlarm = realStatus === 'alarm';
+                
+                if (isAlarm) {
+                    alarmCount++;
+                    // Обновляем статус объекта в массиве
+                    obj.status = 'alarm';
+                    if (!globalAlarms.includes(obj.id)) {
+                        globalAlarms.push(obj.id);
+                    }
+                } else {
+                    obj.status = 'normal';
+                    const index = globalAlarms.indexOf(obj.id);
+                    if (index > -1) {
+                        globalAlarms.splice(index, 1);
+                    }
+                }
                 
                 listItem.innerHTML = `
                     <div class="object-icon" style="background: ${obj.color}">
@@ -706,8 +746,8 @@
                     <div>
                         <div style="font-weight: 600;">${obj.name}</div>
                         <div style="font-size: 0.9rem; opacity: 0.8;">
-                            ${obj.number} | Статус: <span style="color: ${obj.status === 'alarm' ? '#ff4757' : '#4bcffa'}">
-                                ${obj.status === 'alarm' ? 'Авария' : 'Норма'}
+                            ${obj.number} | Статус: <span style="color: ${isAlarm ? '#ff4757' : '#4bcffa'}">
+                                ${isAlarm ? 'Авария' : 'Норма'}
                             </span>
                         </div>
                     </div>
@@ -716,6 +756,21 @@
                 listItem.addEventListener('click', () => selectObject(obj.id));
                 objectList.appendChild(listItem);
             });
+            
+            // Обновляем глобальное предупреждение
+            updateGlobalAlarmBox(alarmCount);
+        }
+        
+        // Обновление глобального предупреждения об авариях
+        function updateGlobalAlarmBox(alarmCount) {
+            const globalAlarmBox = document.getElementById('global-alarm');
+            if (alarmCount > 0) {
+                globalAlarmBox.style.display = 'block';
+                document.getElementById('global-alarm-text').textContent = 
+                    `Обнаружены аварии на ${alarmCount} объектах`;
+            } else {
+                globalAlarmBox.style.display = 'none';
+            }
         }
 
         // Выбор объекта
@@ -1192,6 +1247,12 @@
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             initScheme();
+            
+            // Периодическая проверка статусов из localStorage (каждые 2 секунды)
+            setInterval(function() {
+                updateObjectList();
+                updateGlobalStats();
+            }, 2000);
             
             // Имитация работы системы
             setInterval(function() {

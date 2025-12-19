@@ -143,6 +143,17 @@ function checkWarnings() {
         warnings.push('Давление приближается к критическому');
     }
     
+    // Записываем статус в localStorage для главной страницы
+    const status = warnings.length > 0 ? 'alarm' : 'normal';
+    try {
+        localStorage.setItem('mupn_status_НГС-1', JSON.stringify({
+            status: status,
+            timestamp: Date.now()
+        }));
+    } catch (e) {
+        console.error('Ошибка записи статуса в localStorage:', e);
+    }
+    
     // Отображение предупреждений
     const warningsWindow = document.getElementById('warnings-window');
     const warningsContainer = document.getElementById('warnings-container');

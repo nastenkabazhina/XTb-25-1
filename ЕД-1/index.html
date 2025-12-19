@@ -712,13 +712,32 @@
                     <strong>Рекомендуемый порядок действий:</strong><br>
                     ${instructions.length > 0 ? instructions.map((inst, i) => inst.replace(/^\d+\./, `${i + 1}.`)).join('<br>') : 'Проверьте все параметры системы'}
                 `;
+                
+                // Записываем статус аварии в localStorage
+                updateStatusInStorage('alarm');
             } else {
                 warningWindow.classList.remove('active');
+                
+                // Записываем статус нормы в localStorage
+                updateStatusInStorage('normal');
+            }
+        }
+        
+        // Запись статуса в localStorage для главной страницы
+        function updateStatusInStorage(status) {
+            try {
+                localStorage.setItem('mupn_status_ЕД-1', JSON.stringify({
+                    status: status,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.error('Ошибка записи статуса в localStorage:', e);
             }
         }
 
         // Инициализация
         updateParameters();
+        updateStatusInStorage('normal');
     </script>
 
 </body>

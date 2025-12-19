@@ -1210,12 +1210,27 @@
             if (hasAlarm) {
                 pumpMode.textContent = "АВАРИЯ";
                 pumpMode.previousElementSibling.className = "status-indicator status-alarm";
+                updateStatusInStorage('alarm');
             } else if (npsh < 2 || power > nominalValues.N_nom || temperature > 70) {
                 pumpMode.textContent = "ПРЕДУПР";
                 pumpMode.previousElementSibling.className = "status-indicator status-warning";
+                updateStatusInStorage('alarm'); // Предупреждение тоже считаем аварией
             } else {
                 pumpMode.textContent = "НОРМА";
                 pumpMode.previousElementSibling.className = "status-indicator status-normal";
+                updateStatusInStorage('normal');
+            }
+        }
+        
+        // Запись статуса в localStorage для главной страницы
+        function updateStatusInStorage(status) {
+            try {
+                localStorage.setItem('mupn_status_Н-1', JSON.stringify({
+                    status: status,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.error('Ошибка записи статуса в localStorage:', e);
             }
         }
 

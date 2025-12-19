@@ -285,6 +285,9 @@ class SeparatorView {
       li.textContent = s;
       list.appendChild(li);
     });
+    
+    // Обновляем глобальный статус в localStorage
+    this.updateGlobalStatus();
   }
 
   /**
@@ -306,6 +309,40 @@ class SeparatorView {
       li.textContent = s;
       list.appendChild(li);
     });
+    
+    // Обновляем глобальный статус в localStorage
+    this.updateGlobalStatus();
+  }
+  
+  /**
+   * Обновление глобального статуса в localStorage
+   */
+  updateGlobalStatus() {
+    try {
+      // Проверяем статусы обоих клапанов
+      const waterBadge = this.elements.waterForecastBadge;
+      const oilBadge = this.elements.oilForecastBadge;
+      
+      let globalStatus = 'normal';
+      
+      // Если хотя бы один клапан в критическом состоянии
+      if (waterBadge && waterBadge.className.includes('critical') ||
+          oilBadge && oilBadge.className.includes('critical')) {
+        globalStatus = 'alarm';
+      }
+      // Если хотя бы один клапан в предупреждении
+      else if (waterBadge && waterBadge.className.includes('warning') ||
+               oilBadge && oilBadge.className.includes('warning')) {
+        globalStatus = 'alarm';
+      }
+      
+      localStorage.setItem('mupn_status_НГСВ-1', JSON.stringify({
+        status: globalStatus,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      console.error('Ошибка записи статуса в localStorage:', e);
+    }
   }
   
 

@@ -1243,7 +1243,33 @@
             if (ctrlIgnition) ctrlIgnition.style.background = '#2ed573';
             if (ctrlTemp) ctrlTemp.style.background = '#ffa502';
             if (ctrlFlame) ctrlFlame.style.background = (!isEmergency && !warningVisible) ? '#2ed573' : '#ffa502';
+            
+            // Обновляем статус в localStorage
+            updateStatusInStorage();
         }
+        
+        // Запись статуса в localStorage для главной страницы
+        function updateStatusInStorage() {
+            try {
+                // Определяем статус на основе давления и аварийного состояния
+                let status = 'normal';
+                if (isEmergency || pressure < 0.05) {
+                    status = 'alarm';
+                } else if (warningVisible || pressure < 0.1) {
+                    status = 'alarm';
+                }
+                
+                localStorage.setItem('mupn_status_ВФУ', JSON.stringify({
+                    status: status,
+                    timestamp: Date.now()
+                }));
+            } catch (e) {
+                console.error('Ошибка записи статуса в localStorage:', e);
+            }
+        }
+        
+        // Обновляем статус при загрузке
+        updateStatusInStorage();
     </script>
 </body>
 </html>
