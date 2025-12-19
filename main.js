@@ -105,9 +105,9 @@ function createMenu() {
           }
         },
         {
-          label: 'ГФУ - Факельная установка',
+          label: 'ВФУ - Факельная установка',
           click: () => {
-            mainWindow.loadFile(path.join(__dirname, 'ГФУ', 'index.html'))
+            mainWindow.loadFile(path.join(__dirname, 'ВФУ', 'index.html'))
           }
         }
       ]

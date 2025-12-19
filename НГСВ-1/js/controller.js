@@ -167,16 +167,91 @@ class SeparatorController {
     this.view.bindClick('waterValve', () => {
       this.model.toggleValve('water');
       this.updateValves();
+      
+      // Синхронизация слайдера с кнопкой
+      const waterLevelSlider = document.getElementById('waterLevelK');
+      const waterLevelValDisplay = document.getElementById('waterLevelKVal');
+      const waterLevelOutput = document.getElementById('waterLevelVal');
+      if (waterLevelSlider && waterLevelValDisplay && waterLevelOutput) {
+        const k = this.model.state.waterLevelK;
+        waterLevelSlider.value = k;
+        waterLevelValDisplay.textContent = k.toFixed(2);
+        
+        // Пересчитываем уровень воды
+        let waterVal = 1112;
+        if (k > 0.1) {
+          waterVal -= 792 * Math.cbrt((k - 0.1) / 1.4625);
+        }
+        waterLevelOutput.textContent = waterVal.toFixed(3);
+        this.model.updateParameter('waterLevelMM', waterVal);
+        
+        // Обновляем левый нижний индикатор воды
+        const leftBottomWater = document.getElementById('waterLevelText');
+        if (leftBottomWater) {
+          leftBottomWater.textContent = waterVal.toFixed(3) + ' мм';
+        }
+        
+        // Обновляем окно прогноза
+        if (this.view.updateWaterForecast && this.model.getValveForecast) {
+          const forecast = this.model.getValveForecast('water', k);
+          this.view.updateWaterForecast(forecast);
+        }
+      }
     });
     
     this.view.bindClick('oilValve', () => {
       this.model.toggleValve('oil');
       this.updateValves();
+      
+      // Синхронизация слайдера с кнопкой
+      const oilLevelSlider = document.getElementById('oilLevelK');
+      const oilLevelValDisplay = document.getElementById('oilLevelKVal');
+      const oilLevelOutput = document.getElementById('oilLevelVal');
+      if (oilLevelSlider && oilLevelValDisplay && oilLevelOutput) {
+        const k = this.model.state.oilLevelK;
+        oilLevelSlider.value = k;
+        oilLevelValDisplay.textContent = k.toFixed(2);
+        
+        // Пересчитываем уровень нефти
+        let oilVal = 973;
+        if (k > 0.1) {
+          oilVal -= 473 * Math.cbrt((k - 0.1) / 1.4625);
+        }
+        oilLevelOutput.textContent = oilVal.toFixed(3);
+        this.model.updateParameter('oilLevelMM', oilVal);
+        
+        // Обновляем окно прогноза
+        if (this.view.updateOilForecast && this.model.getValveForecast) {
+          const forecast = this.model.getValveForecast('oil', k);
+          this.view.updateOilForecast(forecast);
+        }
+      }
     });
     
     this.view.bindClick('gasValve', () => {
       this.model.toggleValve('gas');
       this.updateValves();
+      
+      // Синхронизация слайдера с кнопкой
+      const gasSlider = document.getElementById('gas');
+      const gasValDisplay = document.getElementById('gasVal');
+      const pressureValDisplay = document.getElementById('pressureVal');
+      if (gasSlider && gasValDisplay) {
+        const gasValue = this.model.state.gas;
+        gasSlider.value = gasValue;
+        gasValDisplay.textContent = gasValue.toFixed(2);
+        
+        // Пересчитываем давление
+        const pressure = 2.5 * gasValue;
+        if (pressureValDisplay) {
+          pressureValDisplay.textContent = pressure.toFixed(2);
+          // Обновляем левый нижний индикатор давления
+          const leftBottomPressure = document.getElementById('pressureMPa');
+          if (leftBottomPressure) {
+            leftBottomPressure.textContent = pressure.toFixed(3) + ' МПа';
+          }
+        }
+      }
     });
     
     // Насос (если элемент существует)

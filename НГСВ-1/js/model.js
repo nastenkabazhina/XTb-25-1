@@ -7,19 +7,22 @@ class SeparatorModel {
   constructor() {
     // Состояние системы
     this.state = {
-      // Регулятор давления
+      // Регулятор давления (газ)
+      gas: 0.5,           // Степень открытия клапана газа (0-1)
       kvs: 0.5,           // Раскрытие клапана (0-1)
       flow: 100,          // Расход жидкости (м³/сут)
       inletFlow: 5000,     // Входной поток (м³/сут)
       
       // Регулятор воды (новые параметры)
       waterK: 0.5,        // Степень открытия клапана (0-1)
+      waterLevelK: 0.5,   // Степень открытия клапана регулятора уровня воды (0-1)
       waterQ: 100,        // Расход жидкости (м³/сут)
       
       // Регулятор нефти
       oilCv: 20,          // Коэффициент пропускной способности (м³/ч)
       oilDp: 4,           // Перепад давления (бар)
       oilU: 0.5,          // Степень открытия клапана (0-1)
+      oilLevelK: 0.5,     // Степень открытия клапана регулятора уровня нефти (0-1)
       
       // Состояние клапанов
       waterValve: true,   // Открыт/закрыт
@@ -630,9 +633,11 @@ class SeparatorModel {
     
     // Синхронизация со слайдером степени открытия
     if (valveType === 'water') {
-      this.state.waterK = this.state.waterValve ? 0.5 : 0;
+      this.state.waterLevelK = this.state.waterValve ? 0.5 : 0.1;
     } else if (valveType === 'oil') {
-      this.state.oilU = this.state.oilValve ? 0.5 : 0;
+      this.state.oilLevelK = this.state.oilValve ? 0.5 : 0.1;
+    } else if (valveType === 'gas') {
+      this.state.gas = this.state.gasValve ? 0.5 : 0;
     }
     
     this.notify();
