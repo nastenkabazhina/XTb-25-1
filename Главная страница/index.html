@@ -468,6 +468,17 @@
     </div>
 
     <script>
+        // Маппинг номеров объектов на пути к приложениям
+        const objectPaths = {
+            'ГС-1': '../ГС-1/index.html',
+            'ГФУ': '../ГФУ/index.html',
+            'ЕД-1': '../ЕД-1/index.html',
+            'Н-1': '../Н-1/index.html',
+            'НГС-1': '../НГС-1/index.html',
+            'НГСВ-1': '../НГСВ-1/index.html',
+            'П-1': '../П-1/index.html'
+        };
+        
         // Данные объектов МУПН
         const mupnObjects = [
             // Удалён объект УРД-1 (Устье добывающей скважины) по запросу
@@ -712,20 +723,28 @@
             const obj = mupnObjects.find(o => o.id === objectId);
             if (!obj) return;
             
-            currentObject = obj;
-            
-            // Переключаем вид
-            document.getElementById('scheme-view').style.display = 'none';
-            document.getElementById('object-view').style.display = 'block';
-            
-            // Обновляем интерфейс объекта
-            updateObjectInterface(obj);
-            
-            // Обновляем список объектов
-            updateObjectList();
-            
-            // Проверяем состояние объекта
-            checkObjectStatus(obj);
+            // Проверяем, есть ли путь к приложению для этого объекта
+            const appPath = objectPaths[obj.number];
+            if (appPath) {
+                // Перенаправляем на страницу приложения
+                window.location.href = appPath;
+            } else {
+                // Если нет приложения, показываем детали на текущей странице (старое поведение)
+                currentObject = obj;
+                
+                // Переключаем вид
+                document.getElementById('scheme-view').style.display = 'none';
+                document.getElementById('object-view').style.display = 'block';
+                
+                // Обновляем интерфейс объекта
+                updateObjectInterface(obj);
+                
+                // Обновляем список объектов
+                updateObjectList();
+                
+                // Проверяем состояние объекта
+                checkObjectStatus(obj);
+            }
         }
 
         // Обновление интерфейса объекта
